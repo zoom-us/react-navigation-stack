@@ -25,6 +25,8 @@ import Header from '../Header/Header';
 import TransitionConfigs from './StackViewTransitionConfigs';
 import { supportsImprovedSpringAnimation } from '../../utils/ReactNativeFeatures';
 
+import { ScreenStack } from 'react-native-screens';
+
 const emptyFunction = () => {};
 
 const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
@@ -192,6 +194,11 @@ class StackViewLayout extends React.Component {
   }
 
   _reset(resetToIndex, duration) {
+    const {
+      transitionProps: { transitioning },
+    } = this.props;
+    transitioning.setValue(0);
+
     if (Platform.OS === 'ios' && supportsImprovedSpringAnimation()) {
       Animated.spring(this.props.transitionProps.position, {
         toValue: resetToIndex,
@@ -260,7 +267,7 @@ class StackViewLayout extends React.Component {
     },
     onPanResponderGrant: () => {
       const {
-        transitionProps: { navigation, position, scene },
+        transitionProps: { navigation, position, scene, transitioning },
       } = this.props;
       const { index } = navigation.state;
 
@@ -268,6 +275,7 @@ class StackViewLayout extends React.Component {
         return false;
       }
 
+      transitioning.setValue(-1);
       position.stopAnimation(value => {
         this._isResponding = true;
         this._gestureStartValue = value;
@@ -449,7 +457,7 @@ class StackViewLayout extends React.Component {
       );
     }
     const {
-      transitionProps: { scene, scenes },
+      transitionProps: { scene, scenes, progress, transitioning },
       mode,
     } = this.props;
     const { options } = scene.descriptor;
@@ -469,9 +477,9 @@ class StackViewLayout extends React.Component {
 
     return (
       <View {...handlers} style={containerStyle}>
-        <View style={styles.scenes}>
+        <ScreenStack progress={progress} transitioning={transitioning} flex={1}>
           {scenes.map(s => this._renderCard(s))}
-        </View>
+        </ScreenStack>
         {floatingHeader}
       </View>
     );
