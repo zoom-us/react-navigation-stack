@@ -7,6 +7,7 @@ import { ListSection, Divider } from 'react-native-paper';
 
 import SimpleStack from './src/SimpleStack';
 import TransparentStack from './src/TransparentStack';
+import ModalStack from './src/ModalStack';
 
 // Comment the following two lines to stop using react-native-screens
 import { useScreens } from 'react-native-screens';
@@ -14,6 +15,7 @@ useScreens();
 
 const data = [
   { component: SimpleStack, title: 'Simple', routeName: 'SimpleStack' },
+  { component: ModalStack, title: 'Modal', routeName: 'ModalStack' },
   {
     component: TransparentStack,
     title: 'Transparent',
@@ -42,6 +44,7 @@ class Home extends React.Component {
         renderItem={this._renderItem}
         keyExtractor={this._keyExtractor}
         data={data}
+        style={{ backgroundColor: '#fff' }}
       />
     );
   }
