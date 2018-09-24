@@ -28,7 +28,6 @@ class Transitioner extends React.Component {
     this.state = {
       layout,
       position: new Animated.Value(this.props.navigation.state.index),
-      progress: new Animated.Value(1),
       scenes: NavigationScenesReducer(
         [],
         this.props.navigation.state,
@@ -90,9 +89,7 @@ class Transitioner extends React.Component {
       scenes: nextScenes,
     };
 
-    const { position, progress } = nextState;
-
-    progress.setValue(0);
+    const { position } = nextState;
 
     this._prevTransitionProps = this._transitionProps;
     this._transitionProps = buildTransitionProps(nextProps, nextState);
@@ -108,7 +105,6 @@ class Transitioner extends React.Component {
         if (result instanceof Promise) {
           await result;
         }
-        progress.setValue(1);
         position.setValue(toValue);
         this._onTransitionEnd();
       });
@@ -137,10 +133,6 @@ class Transitioner extends React.Component {
     const animations =
       indexHasChanged && positionHasChanged
         ? [
-            timing(progress, {
-              ...transitionSpec,
-              toValue: 1,
-            }),
             timing(position, {
               ...transitionSpec,
               toValue: nextProps.navigation.state.index,
@@ -245,7 +237,7 @@ class Transitioner extends React.Component {
 function buildTransitionProps(props, state) {
   const { navigation } = props;
 
-  const { layout, position, progress, scenes } = state;
+  const { layout, position, scenes } = state;
 
   const scene = scenes.find(isSceneActive);
 
@@ -255,7 +247,6 @@ function buildTransitionProps(props, state) {
     layout,
     navigation,
     position,
-    progress,
     scenes,
     scene,
     index: scene.index,
