@@ -19,7 +19,10 @@ import {
   NavigationProvider,
 } from 'react-navigation';
 import { ScreenContainer } from 'react-native-screens';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import {
+  PanGestureHandler,
+  NativeViewGestureHandler,
+} from 'react-native-gesture-handler';
 
 import Card from './StackViewCard';
 import Header from '../Header/Header';
@@ -288,13 +291,17 @@ class StackViewLayout extends React.Component {
       this._getTransitionConfig().containerStyle,
     ];
 
+    // TODO: activate only when within some distance of the edge of the screen
+    // within the GESTURE_RESPONSE_DISTANCE_HORIZONTAL / VERTICAL threshold
+    // https://github.com/kmagiera/react-native-gesture-handler/issues/293
     return (
-      <PanGestureHandler 
-        onGestureEvent={this._handlePanGestureEvent}
-        minOffsetX={15}
+      <PanGestureHandler
+        minOffsetX={this._isGestureInverted() ? -15 : 15}
         maxDeltaY={5}
+        onGestureEvent={this._handlePanGestureEvent}
         onHandlerStateChange={this._handlePanGestureStateChange}
-        enabled={gesturesEnabled}>
+        enabled={gesturesEnabled}
+      >
         <View style={containerStyle}>
           <ScreenContainer style={styles.scenes}>
             {scenes.map(s => this._renderCard(s))}
@@ -305,39 +312,58 @@ class StackViewLayout extends React.Component {
     );
   }
 
+  // Without using Reanimated it's not possible to do all of the following
+  // stuff with native driver.
   _handlePanGestureEvent = ({ nativeEvent }) => {
-      // const startValue = this._gestureStartValue;
-      // const axis = isVertical ? 'dy' : 'dx';
-      // const axisDistance = isVertical
-      //   ? layout.height.__getValue()
-      //   : layout.width.__getValue();
-      // const currentValue =
-      //   axis === 'dx' && gestureDirectionInverted
-      //     ? startValue + gesture[axis] / axisDistance
-      //     : startValue - gesture[axis] / axisDistance;
-      // const value = clamp(index - 1, currentValue, index);
-      // position.setValue(value);
+    const { mode } = this.props;
+    const isVertical = mode === 'modal';
 
+    if (isVertical) {
+      this._handleVerticalPan(nativeEvent);
+    } else {
+      this._handleHorizontalPan(nativeEvent);
+    }
+  };
 
-      // Without using Reanimated it's not possible to do all of the following
-      // stuff with native driver.
-      const {
-        transitionProps: { navigation, position, layout, scene },
-        mode,
-      } = this.props;
-      const { index } = navigation.state;
-      const distance = layout.width.__getValue();
-      const translation = nativeEvent.translationX;
-      const currentValue = 1 - translation / distance;
-      const value = clamp(index - 1, currentValue, index);
-      console.log({ distance, translation, currentValue })
-      position.setValue(value);
-  }
+  _isGestureInverted = () => {
+    const {
+      transitionProps: { scene },
+    } = this.props;
+    const { options } = scene.descriptor;
+    const { gestureDirection } = options;
+
+    return typeof gestureDirection === 'string'
+      ? gestureDirection === 'inverted'
+      : I18nManager.isRTL;
+  };
+
+  _handleHorizontalPan = nativeEvent => {
+    let {
+      transitionProps: { navigation, position, layout },
+    } = this.props;
+
+    let { index } = navigation.state;
+
+    let distance = layout.width.__getValue();
+    let translation = nativeEvent.translationX;
+
+    if (this._isGestureInverted()) {
+      translation *= -1;
+    }
+
+    let currentValue = 1 - translation / distance;
+    let value = clamp(index - 1, currentValue, index);
+    position.setValue(value);
+  };
+
+  _handleVerticalPan = nativeEvent => {
+    // todo
+  };
 
   _handlePanGestureStateChange = ({ nativeEvent }) => {
     const { oldState, state } = nativeEvent;
     // console.log({ nativeEvent })
-  }
+  };
 
   _getHeaderMode() {
     if (this.props.headerMode) {
