@@ -19,10 +19,7 @@ import {
   NavigationProvider,
 } from 'react-navigation';
 import { ScreenContainer } from 'react-native-screens';
-import {
-  PanGestureHandler,
-  NativeViewGestureHandler,
-} from 'react-native-gesture-handler';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 import Card from './StackViewCard';
 import Header from '../Header/Header';
@@ -277,9 +274,10 @@ class StackViewLayout extends React.Component {
       );
     }
     const {
-      transitionProps: { scene, scenes },
+      transitionProps: { navigation, scene, scenes },
     } = this.props;
     const { options } = scene.descriptor;
+    const { index } = navigation.state;
 
     const gesturesEnabled =
       typeof options.gesturesEnabled === 'boolean'
@@ -296,7 +294,7 @@ class StackViewLayout extends React.Component {
     // https://github.com/kmagiera/react-native-gesture-handler/issues/293
     return (
       <PanGestureHandler
-        minOffsetX={this._isGestureInverted() ? -15 : 15}
+        minOffsetX={this._isMotionInverted() ? -15 : 15}
         maxDeltaY={5}
         onGestureEvent={this._handlePanGestureEvent}
         onHandlerStateChange={this._handlePanGestureStateChange}
@@ -315,17 +313,19 @@ class StackViewLayout extends React.Component {
   // Without using Reanimated it's not possible to do all of the following
   // stuff with native driver.
   _handlePanGestureEvent = ({ nativeEvent }) => {
-    const { mode } = this.props;
-    const isVertical = mode === 'modal';
-
-    if (isVertical) {
+    if (this._isMotionVertical()) {
       this._handleVerticalPan(nativeEvent);
     } else {
       this._handleHorizontalPan(nativeEvent);
     }
   };
 
-  _isGestureInverted = () => {
+  _isMotionVertical = () => {
+    const { mode } = this.props;
+    return mode === 'modal';
+  };
+
+  _isMotionInverted = () => {
     const {
       transitionProps: { scene },
     } = this.props;
@@ -338,22 +338,25 @@ class StackViewLayout extends React.Component {
   };
 
   _handleHorizontalPan = nativeEvent => {
+    let value = this._computeHorizontalGestureValue(nativeEvent);
+    console.log({value})
+    this.props.transitionProps.position.setValue(value);
+  };
+
+  _computeHorizontalGestureValue = nativeEvent => {
     let {
-      transitionProps: { navigation, position, layout },
+      transitionProps: { navigation, layout },
     } = this.props;
 
     let { index } = navigation.state;
-
     let distance = layout.width.__getValue();
-    let translation = nativeEvent.translationX;
+    let translationX = this._isMotionInverted()
+      ? -1 * nativeEvent.translationX
+      : nativeEvent.translationX;
 
-    if (this._isGestureInverted()) {
-      translation *= -1;
-    }
-
-    let currentValue = 1 - translation / distance;
-    let value = clamp(index - 1, currentValue, index);
-    position.setValue(value);
+    let value = index - translationX / distance;
+    console.log({ value, index, translationX })
+    return clamp(index - 1, value, index);
   };
 
   _handleVerticalPan = nativeEvent => {
@@ -361,8 +364,68 @@ class StackViewLayout extends React.Component {
   };
 
   _handlePanGestureStateChange = ({ nativeEvent }) => {
-    const { oldState, state } = nativeEvent;
-    // console.log({ nativeEvent })
+    if (nativeEvent.oldState !== State.ACTIVE) {
+      return;
+    }
+
+    if (this._isMotionVertical()) {
+      this._handleReleaseVertical(nativeEvent);
+    } else {
+      this._handleReleaseHorizontal(nativeEvent);
+    }
+  };
+
+  _handleReleaseHorizontal = nativeEvent => {
+    const {
+      transitionProps: { navigation, position, layout, scene },
+      mode,
+    } = this.props;
+    const { index } = navigation.state;
+    const immediateIndex =
+      this._immediateIndex == null ? index : this._immediateIndex;
+
+    // Calculate animate duration according to gesture speed and moved distance
+    const distance = layout.width.__getValue();
+    const movementDirection = this._isMotionInverted() ? -1 : 1;
+    const movedDistance = movementDirection * nativeEvent.translationX;
+    const gestureVelocity = movementDirection * nativeEvent.velocityX;
+    const defaultVelocity = distance / ANIMATION_DURATION;
+    const velocity = Math.max(Math.abs(gestureVelocity), defaultVelocity);
+    const resetDuration = this._isMotionInverted()
+      ? (distance - movedDistance) / velocity
+      : movedDistance / velocity;
+    const goBackDuration = this._isMotionInverted()
+      ? movedDistance / velocity
+      : (distance - movedDistance) / velocity;
+
+    let value = this._computeHorizontalGestureValue(nativeEvent);
+
+    // If the speed of the gesture release is significant, use that as the indication
+    // of intent
+    if (gestureVelocity < -0.5) {
+      this.props.onGestureCanceled && this.props.onGestureCanceled();
+      this._reset(immediateIndex, resetDuration);
+      return;
+    }
+    if (gestureVelocity > 0.5) {
+      this.props.onGestureFinish && this.props.onGestureFinish();
+      this._goBack(immediateIndex, goBackDuration);
+      return;
+    }
+
+    // Then filter based on the distance the screen was moved. Over a third of the way swiped,
+    // and the back will happen.
+    if (value <= index - POSITION_THRESHOLD) {
+      this.props.onGestureFinish && this.props.onGestureFinish();
+      this._goBack(immediateIndex, goBackDuration);
+    } else {
+      this.props.onGestureCanceled && this.props.onGestureCanceled();
+      this._reset(immediateIndex, resetDuration);
+    }
+  };
+
+  _handleReleaseVertical = nativeEvent => {
+    // todo
   };
 
   _getHeaderMode() {
