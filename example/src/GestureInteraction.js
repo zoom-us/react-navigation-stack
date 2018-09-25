@@ -33,26 +33,24 @@ MapScreen.navigationOptions = {
   title: 'MapView',
 };
 const WebViewScreen = () => (
-  <NativeViewGestureHandler>
-    <WebView style={{ flex: 1 }} source={{ uri: 'https://news.google.com' }} />
-  </NativeViewGestureHandler>
+  <GestureContext.Consumer>
+    {ref => (
+      <NativeViewGestureHandler waitFor={ref}>
+        <WebView
+          style={{ flex: 1 }}
+          source={{ uri: 'https://news.google.com' }}
+        />
+      </NativeViewGestureHandler>
+    )}
+  </GestureContext.Consumer>
 );
 
 WebViewScreen.navigationOptions = {
   title: 'WebView',
 };
 
-const DrawerExample = createStackNavigator(
-  {
-    Index: IndexScreen,
-    Map: MapScreen,
-    Web: WebViewScreen,
-  },
-  {
-    contentOptions: {
-      activeTintColor: '#e91e63',
-    },
-  }
-);
-
-export default DrawerExample;
+export default createStackNavigator({
+  Index: IndexScreen,
+  Map: MapScreen,
+  Web: WebViewScreen,
+});
