@@ -1,7 +1,5 @@
 import React from 'react';
 
-import clamp from '../../utils/clamp';
-import GestureContext from '../../utils/GestureContext';
 import {
   Animated,
   StyleSheet,
@@ -24,8 +22,9 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 import Card from './StackViewCard';
 import Header from '../Header/Header';
-
 import TransitionConfigs from './StackViewTransitionConfigs';
+import StackGestureContext from '../../utils/StackGestureContext';
+import clamp from '../../utils/clamp';
 import { supportsImprovedSpringAnimation } from '../../utils/ReactNativeFeatures';
 
 const emptyFunction = () => {};
@@ -303,12 +302,12 @@ class StackViewLayout extends React.Component {
         enabled={index > 0 && gesturesEnabled}
       >
         <View style={containerStyle}>
-          <GestureContext.Provider value={this.panGestureRef}>
+          <StackGestureContext.Provider value={this.panGestureRef}>
             <ScreenContainer style={styles.scenes}>
               {scenes.map(s => this._renderCard(s))}
             </ScreenContainer>
             {floatingHeader}
-          </GestureContext.Provider>
+          </StackGestureContext.Provider>
         </View>
       </PanGestureHandler>
     );
