@@ -1,6 +1,7 @@
 import React from 'react';
 
 import clamp from '../../utils/clamp';
+import GestureContext from '../../utils/GestureContext';
 import {
   Animated,
   StyleSheet,
@@ -120,6 +121,7 @@ class StackViewLayout extends React.Component {
 
   constructor(props) {
     super(props);
+    this.panGestureRef = React.createRef();
 
     this.state = {
       // Used when card's header is null and mode is float to make transition
@@ -295,15 +297,18 @@ class StackViewLayout extends React.Component {
     return (
       <PanGestureHandler
         {...this._gestureActivationCriteria()}
+        ref={this.panGestureRef}
         onGestureEvent={this._handlePanGestureEvent}
         onHandlerStateChange={this._handlePanGestureStateChange}
         enabled={index > 0 && gesturesEnabled}
       >
         <View style={containerStyle}>
-          <ScreenContainer style={styles.scenes}>
-            {scenes.map(s => this._renderCard(s))}
-          </ScreenContainer>
-          {floatingHeader}
+          <GestureContext.Provider value={this.panGestureRef}>
+            <ScreenContainer style={styles.scenes}>
+              {scenes.map(s => this._renderCard(s))}
+            </ScreenContainer>
+            {floatingHeader}
+          </GestureContext.Provider>
         </View>
       </PanGestureHandler>
     );

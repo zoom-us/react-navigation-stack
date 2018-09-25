@@ -52,4 +52,7 @@ module.exports = {
   get ScenesReducer() {
     return require('./views/ScenesReducer').default;
   },
+  get GestureContext() {
+    return require('./utils/GestureContext').default;
+  }
 };

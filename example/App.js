@@ -8,6 +8,7 @@ import { ListSection, Divider } from 'react-native-paper';
 import SimpleStack from './src/SimpleStack';
 import TransparentStack from './src/TransparentStack';
 import ModalStack from './src/ModalStack';
+import GestureInteraction from './src/GestureInteraction';
 
 // Comment the following two lines to stop using react-native-screens
 import { useScreens } from 'react-native-screens';
@@ -21,6 +22,7 @@ const data = [
     title: 'Transparent',
     routeName: 'TransparentStack',
   },
+  { component: GestureInteraction, title: 'Gesture Interaction', routeName: 'GestureInteraction' },
 ];
 
 class Home extends React.Component {
