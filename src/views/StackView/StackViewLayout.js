@@ -71,7 +71,7 @@ const RESPOND_THRESHOLD = 20;
 /**
  * The distance of touch start from the edge of the screen where the gesture will be recognized
  */
-const GESTURE_RESPONSE_DISTANCE_HORIZONTAL = 25;
+const GESTURE_RESPONSE_DISTANCE_HORIZONTAL = 30;
 const GESTURE_RESPONSE_DISTANCE_VERTICAL = 135;
 
 const animatedSubscribeValue = animatedValue => {
@@ -314,15 +314,26 @@ class StackViewLayout extends React.Component {
   }
 
   _gestureActivationCriteria = () => {
+    let { layout } = this.props.transitionProps;
+
     if (this._isMotionVertical()) {
+      let height = layout.height.__getValue();
+
       return {
         maxDeltaX: 7,
         minOffsetY: 15,
+        hitSlop: { bottom: -height + GESTURE_RESPONSE_DISTANCE_VERTICAL },
       };
     } else {
+      let width = layout.width.__getValue();
+      let hitSlop = -width + GESTURE_RESPONSE_DISTANCE_HORIZONTAL;
+
       return {
         minOffsetX: this._isMotionInverted() ? -15 : 15,
         maxDeltaY: 5,
+        hitSlop: this._isMotionInverted()
+          ? { left: hitSlop }
+          : { right: hitSlop },
       };
     }
   };
