@@ -1,7 +1,14 @@
 import React from 'react';
-import { Button, WebView, View, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  Button,
+  InteractionManager,
+  WebView,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { MapView } from 'expo';
-import { createStackNavigator } from 'react-navigation';
+import { createStackNavigator, withNavigationFocus } from 'react-navigation';
 import { StackGestureContext } from 'react-navigation-stack';
 import {
   PanGestureHandler,
@@ -12,16 +19,40 @@ const IndexScreen = ({ navigation }) => (
   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
     <Button title="Go to MapView" onPress={() => navigation.navigate('Map')} />
     <Button title="Go to WebView" onPress={() => navigation.navigate('Web')} />
-    <Button title="Return to other examples" onPress={() => navigation.navigate('Home')} />
+    <Button
+      title="Return to other examples"
+      onPress={() => navigation.navigate('Home')}
+    />
   </View>
 );
 
 IndexScreen.navigationOptions = {
-  title: 'Gesture Interactions'
+  title: 'Gesture Interactions',
 };
 
 class MapScreen extends React.Component {
+  constructor(props) {
+    super(props);
+    InteractionManager.runAfterInteractions(() => {
+      this.setState({ interactionComplete: true });
+    });
+
+    this.state = {
+      interactionComplete: false,
+    };
+  }
+
   render() {
+    if (!this.state.interactionComplete) {
+      return (
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <ActivityIndicator />
+        </View>
+      );
+    }
+
     return (
       <StackGestureContext.Consumer>
         {ref => (
@@ -37,6 +68,7 @@ class MapScreen extends React.Component {
 MapScreen.navigationOptions = {
   title: 'MapView',
 };
+
 const WebViewScreen = () => (
   <StackGestureContext.Consumer>
     {ref => (
