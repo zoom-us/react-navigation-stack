@@ -76,15 +76,6 @@ const GESTURE_RESPONSE_DISTANCE_VERTICAL = 135;
 
 const USE_NATIVE_DRIVER = true;
 
-const animatedSubscribeValue = animatedValue => {
-  if (!animatedValue.__isNative) {
-    return;
-  }
-  if (Object.keys(animatedValue._listeners).length === 0) {
-    animatedValue.addListener(emptyFunction);
-  }
-};
-
 const getDefaultHeaderHeight = isLandscape => {
   if (Platform.OS === 'ios') {
     if (isLandscape && !Platform.isPad) {
@@ -185,19 +176,6 @@ class StackViewLayout extends React.Component {
         })}
       </NavigationProvider>
     );
-  }
-
-  _animatedSubscribe(props) {
-    // Hack to make this work with native driven animations. We add a single listener
-    // so the JS value of the following animated values gets updated. We rely on
-    // some Animated private APIs and not doing so would require using a bunch of
-    // value listeners but we'd have to remove them to not leak and I'm not sure
-    // when we'd do that with the current structure we have. `stopAnimation` callback
-    // is also broken with native animated values that have no listeners so if we
-    // want to remove this we have to fix this too.
-    animatedSubscribeValue(props.transitionProps.layout.width);
-    animatedSubscribeValue(props.transitionProps.layout.height);
-    animatedSubscribeValue(props.transitionProps.position);
   }
 
   _reset(resetToIndex, duration) {
