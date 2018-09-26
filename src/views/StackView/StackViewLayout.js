@@ -336,8 +336,8 @@ class StackViewLayout extends React.Component {
       let hitSlop = -width + GESTURE_RESPONSE_DISTANCE_HORIZONTAL;
 
       return {
-        minOffsetX: this._isMotionInverted() ? -15 : 15,
-        maxDeltaY: 5,
+        minOffsetX: this._isMotionInverted() ? -5 : 5,
+        maxDeltaY: 20,
         hitSlop: this._isMotionInverted()
           ? { left: hitSlop }
           : { right: hitSlop },
@@ -663,9 +663,19 @@ class StackViewLayout extends React.Component {
   };
 
   _getPosition = () => {
-    return this.state.gesturePosition
-      ? this.state.gesturePosition
-      : this.props.transitionProps.position;
+    if (!this.state.gesturePosition) {
+      return this.props.transitionProps.position;
+    } else {
+      let { gesturePosition } = this.state;
+      let staticPosition = Animated.add(
+        this.props.transitionProps.position,
+        Animated.multiply(
+          -1,
+          this.props.transitionProps.position
+        )
+      );
+      return Animated.add(gesturePosition, staticPosition);
+    }
   };
 
   _renderCard = scene => {
