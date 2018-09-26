@@ -415,22 +415,38 @@ class StackViewLayout extends React.Component {
   _handleActivateGestureHorizontal = nativeEvent => {
     let { index } = this.props.transitionProps.navigation.state;
 
-    this.setState({
-      gesturePosition: Animated.add(
-        index,
-        Animated.multiply(
-          -1,
+    if (this._isMotionInverted()) {
+      this.setState({
+        gesturePosition: Animated.add(
+          index,
           Animated.divide(
             this.gestureX,
             this.props.transitionProps.layout.width
           )
-        )
-      ).interpolate({
-        inputRange: [index - 1, index],
-        outputRange: [index - 1, index],
-        extrapolate: 'clamp',
-      }),
-    });
+        ).interpolate({
+          inputRange: [index - 1, index],
+          outputRange: [index - 1, index],
+          extrapolate: 'clamp',
+        }),
+      });
+    } else {
+      this.setState({
+        gesturePosition: Animated.add(
+          index,
+          Animated.multiply(
+            -1,
+            Animated.divide(
+              this.gestureX,
+              this.props.transitionProps.layout.width
+            )
+          )
+        ).interpolate({
+          inputRange: [index - 1, index],
+          outputRange: [index - 1, index],
+          extrapolate: 'clamp',
+        }),
+      });
+    }
   };
 
   _handleActivateGestureVertical = nativeEvent => {
@@ -518,8 +534,8 @@ class StackViewLayout extends React.Component {
 
     // Calculate animate duration according to gesture speed and moved distance
     const distance = layout.height.__getValue();
-    const movedDistance = nativeEvent.translationX;
-    const gestureVelocity = nativeEvent.velocityX;
+    const movedDistance = nativeEvent.translationY;
+    const gestureVelocity = nativeEvent.velocityY;
     const defaultVelocity = distance / ANIMATION_DURATION;
     const velocity = Math.max(Math.abs(gestureVelocity), defaultVelocity);
     const resetDuration = movedDistance / velocity;

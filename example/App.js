@@ -1,6 +1,6 @@
 import React from 'react';
 import Expo from 'expo';
-import { FlatList } from 'react-native';
+import { FlatList, I18nManager } from 'react-native';
 import { createSwitchNavigator } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { ListSection, Divider } from 'react-native-paper';
@@ -10,8 +10,12 @@ import TransparentStack from './src/TransparentStack';
 import ModalStack from './src/ModalStack';
 import GestureInteraction from './src/GestureInteraction';
 
+// Uncomment the following line to force RTL. Requires closing and re-opening
+// your app after you first load it with this option enabled.
+// I18nManager.forceRTL(false);
+
 // Comment the following two lines to stop using react-native-screens
-import { useScreens } from 'react-native-screens';
+// import { useScreens } from 'react-native-screens';
 // useScreens();
 
 const data = [
