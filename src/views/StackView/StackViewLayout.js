@@ -74,6 +74,8 @@ const RESPOND_THRESHOLD = 20;
 const GESTURE_RESPONSE_DISTANCE_HORIZONTAL = 30;
 const GESTURE_RESPONSE_DISTANCE_VERTICAL = 135;
 
+const USE_NATIVE_DRIVER = true;
+
 const animatedSubscribeValue = animatedValue => {
   if (!animatedValue.__isNative) {
     return;
@@ -121,6 +123,7 @@ class StackViewLayout extends React.Component {
   constructor(props) {
     super(props);
     this.panGestureRef = React.createRef();
+    this.gestureX = new Animated.Value(0);
 
     this.state = {
       // Used when card's header is null and mode is float to make transition
@@ -129,6 +132,7 @@ class StackViewLayout extends React.Component {
       // on mount what the header height is so we have just used the most
       // common cases here.
       floatingHeaderHeight: getDefaultHeaderHeight(props.isLandscape),
+      gesturePosition: null,
     };
   }
 
@@ -168,11 +172,12 @@ class StackViewLayout extends React.Component {
         {renderHeader({
           ...passProps,
           ...transitionProps,
+          position: this._getPosition(),
           scene,
           mode: headerMode,
           transitionPreset: this._getHeaderTransitionPreset(),
           layoutPreset: this._getHeaderLayoutPreset(),
-          backTitleVisible: this._getheaderBackTitleVisible(),
+          backTitleVisible: this._getHeaderBackTitleVisible(),
           leftInterpolator: headerLeftInterpolator,
           titleInterpolator: headerTitleInterpolator,
           rightInterpolator: headerRightInterpolator,
@@ -202,14 +207,14 @@ class StackViewLayout extends React.Component {
         stiffness: 5000,
         damping: 600,
         mass: 3,
-        useNativeDriver: this.props.transitionProps.position.__isNative,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start();
     } else {
       Animated.timing(this.props.transitionProps.position, {
         toValue: resetToIndex,
         duration,
         easing: EaseInOut,
-        useNativeDriver: this.props.transitionProps.position.__isNative,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start();
     }
   }
@@ -242,14 +247,14 @@ class StackViewLayout extends React.Component {
         stiffness: 5000,
         damping: 600,
         mass: 3,
-        useNativeDriver: position.__isNative,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start(onCompleteAnimation);
     } else {
       Animated.timing(position, {
         toValue,
         duration,
         easing: EaseInOut,
-        useNativeDriver: position.__isNative,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start(onCompleteAnimation);
     }
   }
@@ -290,25 +295,27 @@ class StackViewLayout extends React.Component {
       this._getTransitionConfig().containerStyle,
     ];
 
-    // TODO: activate only when within some distance of the edge of the screen
-    // within the GESTURE_RESPONSE_DISTANCE_HORIZONTAL / VERTICAL threshold
-    // https://github.com/kmagiera/react-native-gesture-handler/issues/293
     return (
       <PanGestureHandler
         {...this._gestureActivationCriteria()}
         ref={this.panGestureRef}
-        onGestureEvent={this._handlePanGestureEvent}
+        onGestureEvent={Animated.event(
+          [{ nativeEvent: { translationX: this.gestureX } }],
+          {
+            useNativeDriver: USE_NATIVE_DRIVER,
+          }
+        )}
         onHandlerStateChange={this._handlePanGestureStateChange}
         enabled={index > 0 && gesturesEnabled}
       >
-        <View style={containerStyle}>
+        <Animated.View style={containerStyle}>
           <StackGestureContext.Provider value={this.panGestureRef}>
             <ScreenContainer style={styles.scenes}>
               {scenes.map(s => this._renderCard(s))}
             </ScreenContainer>
             {floatingHeader}
           </StackGestureContext.Provider>
-        </View>
+        </Animated.View>
       </PanGestureHandler>
     );
   }
@@ -403,15 +410,35 @@ class StackViewLayout extends React.Component {
   };
 
   _handlePanGestureStateChange = ({ nativeEvent }) => {
-    if (nativeEvent.oldState !== State.ACTIVE) {
-      return;
+    if (nativeEvent.oldState === State.ACTIVE) {
+      if (this._isMotionVertical()) {
+        this._handleReleaseVertical(nativeEvent);
+      } else {
+        this._handleReleaseHorizontal(nativeEvent);
+      }
+    } else if (nativeEvent.state === State.ACTIVE) {
+      if (this._isMotionVertical()) {
+        this._handleActivateGestureVertical(nativeEvent);
+      } else {
+        this._handleActivateGestureHorizontal(nativeEvent);
+      }
     }
+  };
 
-    if (this._isMotionVertical()) {
-      this._handleReleaseVertical(nativeEvent);
-    } else {
-      this._handleReleaseHorizontal(nativeEvent);
-    }
+  _handleActivateGestureHorizontal = nativeEvent => {
+    let { index } = this.props.transitionProps.navigation.state;
+    let distance = this.props.transitionProps.layout.width.__getValue();
+
+    this.setState({
+      gesturePosition: Animated.add(
+        index,
+        Animated.multiply(-1, Animated.divide(this.gestureX, distance))
+      ).interpolate({
+        inputRange: [index - 1, index],
+        outputRange: [index - 1, index],
+        extrapolate: 'clamp',
+      }),
+    });
   };
 
   _handleReleaseHorizontal = nativeEvent => {
@@ -437,30 +464,38 @@ class StackViewLayout extends React.Component {
       ? movedDistance / velocity
       : (distance - movedDistance) / velocity;
 
+    // Get the current position value and reset to using the statically driven
+    // (rather than gesture driven) position.
     let value = this._computeHorizontalGestureValue(nativeEvent);
+    position.setValue(value);
+    this.setState({ gesturePosition: null }, () => {
+      // If the speed of the gesture release is significant, use that as the indication
+      // of intent
+      if (gestureVelocity < -0.5) {
+        this.props.onGestureCanceled && this.props.onGestureCanceled();
+        this._reset(immediateIndex, resetDuration);
+        return;
+      }
+      if (gestureVelocity > 0.5) {
+        this.props.onGestureFinish && this.props.onGestureFinish();
+        this._goBack(immediateIndex, goBackDuration);
+        return;
+      }
 
-    // If the speed of the gesture release is significant, use that as the indication
-    // of intent
-    if (gestureVelocity < -0.5) {
-      this.props.onGestureCanceled && this.props.onGestureCanceled();
-      this._reset(immediateIndex, resetDuration);
-      return;
-    }
-    if (gestureVelocity > 0.5) {
-      this.props.onGestureFinish && this.props.onGestureFinish();
-      this._goBack(immediateIndex, goBackDuration);
-      return;
-    }
+      // Then filter based on the distance the screen was moved. Over a third of the way swiped,
+      // and the back will happen.
+      if (value <= index - POSITION_THRESHOLD) {
+        this.props.onGestureFinish && this.props.onGestureFinish();
+        this._goBack(immediateIndex, goBackDuration);
+      } else {
+        this.props.onGestureCanceled && this.props.onGestureCanceled();
+        this._reset(immediateIndex, resetDuration);
+      }
+    });
+  };
 
-    // Then filter based on the distance the screen was moved. Over a third of the way swiped,
-    // and the back will happen.
-    if (value <= index - POSITION_THRESHOLD) {
-      this.props.onGestureFinish && this.props.onGestureFinish();
-      this._goBack(immediateIndex, goBackDuration);
-    } else {
-      this.props.onGestureCanceled && this.props.onGestureCanceled();
-      this._reset(immediateIndex, resetDuration);
-    }
+  _handleActivateGestureVertical = nativeEvent => {
+    // todo
   };
 
   _handleReleaseVertical = nativeEvent => {
@@ -576,10 +611,12 @@ class StackViewLayout extends React.Component {
     return 'fade-in-place';
   }
 
-  _getheaderBackTitleVisible() {
+  _getHeaderBackTitleVisible() {
     const { headerBackTitleVisible } = this.props;
 
-    return headerBackTitleVisible;
+    return typeof headerBackTitleVisible === 'boolean'
+      ? headerBackTitleVisible
+      : true;
   }
 
   _renderInnerScene(scene) {
@@ -616,10 +653,19 @@ class StackViewLayout extends React.Component {
 
     return TransitionConfigs.getTransitionConfig(
       this.props.transitionConfig,
-      this.props.transitionProps,
+      {
+        ...this.props.transitionProps,
+        position: this._getPosition(),
+      },
       this.props.lastTransitionProps,
       isModal
     );
+  };
+
+  _getPosition = () => {
+    return this.state.gesturePosition
+      ? this.state.gesturePosition
+      : this.props.transitionProps.position;
   };
 
   _renderCard = scene => {
@@ -627,7 +673,11 @@ class StackViewLayout extends React.Component {
 
     const style =
       screenInterpolator &&
-      screenInterpolator({ ...this.props.transitionProps, scene });
+      screenInterpolator({
+        ...this.props.transitionProps,
+        position: this._getPosition(),
+        scene,
+      });
 
     // When using a floating header, we need to add some top
     // padding on the scene.
@@ -642,6 +692,8 @@ class StackViewLayout extends React.Component {
     return (
       <Card
         {...this.props.transitionProps}
+        position={this._getPosition()}
+        realPosition={this.props.transitionProps.position}
         key={`card_${scene.key}`}
         transparent={this.props.transparentCard}
         style={[style, { paddingTop }, this.props.cardStyle]}

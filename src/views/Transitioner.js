@@ -25,9 +25,16 @@ class Transitioner extends React.Component {
       width: new Animated.Value(0),
     };
 
+    const position = new Animated.Value(this.props.navigation.state.index);
+    this._positionListener = position.addListener(({ value }) => {
+      // this works until we detach position from a view!
+      // after that it only updates when we call setValue
+        console.log(value);
+    });
+
     this.state = {
       layout,
-      position: new Animated.Value(this.props.navigation.state.index),
+      position,
       scenes: NavigationScenesReducer(
         [],
         this.props.navigation.state,
@@ -49,6 +56,7 @@ class Transitioner extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+    this._positionListener && this._positionListener.remove();
   }
 
   // eslint-disable-next-line react/no-deprecated

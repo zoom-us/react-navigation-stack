@@ -12,21 +12,26 @@ export default function createPointerEventsContainer(Component) {
   class Container extends React.Component {
     constructor(props, context) {
       super(props, context);
-      this._pointerEvents = this._computePointerEvents();
+      // this._pointerEvents = this._computePointerEvents();
     }
 
     componentWillUnmount() {
-      this._positionListener && this._positionListener.remove();
+      // this._positionListener && this._positionListener.remove();
     }
 
     render() {
-      this._bindPosition();
-      this._pointerEvents = this._computePointerEvents();
+      // this._bindPosition();
+      // this._pointerEvents = this._computePointerEvents();
+
+      const { navigation, scene } = this.props;
 
       return (
         <Component
           {...this.props}
-          pointerEvents={this._pointerEvents}
+          pointerEvents={
+            scene.index === navigation.state.index ? 'auto' : 'none'
+          }
+          // pointerEvents={this._pointerEvents}
           onComponentRef={this._onComponentRef}
         />
       );
@@ -43,40 +48,41 @@ export default function createPointerEventsContainer(Component) {
     };
 
     _bindPosition() {
-      this._positionListener && this._positionListener.remove();
-      this._positionListener = new AnimatedValueSubscription(
-        this.props.position,
-        this._onPositionChange
-      );
+      // this._positionListener && this._positionListener.remove();
+      // this._positionListener = new AnimatedValueSubscription(
+      //   this.props.realPosition,
+      //   () => {}
+      // );
     }
 
-    _onPositionChange = () => {
-      if (this._component) {
-        const pointerEvents = this._computePointerEvents();
-        if (this._pointerEvents !== pointerEvents) {
-          this._pointerEvents = pointerEvents;
-          this._component.setNativeProps({ pointerEvents });
-        }
-      }
+    _onPositionChange = ({ value }) => {
+      // console.log({ value });
+      // if (this._component) {
+      //   const pointerEvents = this._computePointerEvents();
+      //   if (this._pointerEvents !== pointerEvents) {
+      //     this._pointerEvents = pointerEvents;
+      //     this._component.setNativeProps({ pointerEvents });
+      //   }
+      // }
     };
 
     _computePointerEvents() {
-      const { navigation, position, scene } = this.props;
+      // const { navigation, realPosition, scene } = this.props;
 
-      if (scene.isStale || navigation.state.index !== scene.index) {
-        // The scene isn't focused.
-        return scene.index > navigation.state.index ? 'box-only' : 'none';
-      }
+      // if (scene.isStale || navigation.state.index !== scene.index) {
+      //   // The scene isn't focused.
+      //   return scene.index > navigation.state.index ? 'box-only' : 'none';
+      // }
 
-      const offset = position.__getAnimatedValue() - navigation.state.index;
-      if (Math.abs(offset) > MIN_POSITION_OFFSET) {
-        // The positon is still away from scene's index.
-        // Scene's children should not receive touches until the position
-        // is close enough to scene's index.
-        return 'box-only';
-      }
+      // const offset = realPosition.__getAnimatedValue() - navigation.state.index;
+      // if (Math.abs(offset) > MIN_POSITION_OFFSET) {
+      //   // The positon is still away from scene's index.
+      //   // Scene's children should not receive touches until the position
+      //   // is close enough to scene's index.
+      //   return 'box-only';
+      // }
 
-      return 'auto';
+      // return 'auto';
     }
   }
   return Container;

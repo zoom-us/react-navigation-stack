@@ -12,7 +12,7 @@ import GestureInteraction from './src/GestureInteraction';
 
 // Comment the following two lines to stop using react-native-screens
 import { useScreens } from 'react-native-screens';
-useScreens();
+// useScreens();
 
 const data = [
   { component: SimpleStack, title: 'Simple', routeName: 'SimpleStack' },
