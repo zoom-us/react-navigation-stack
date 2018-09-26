@@ -27,9 +27,13 @@ class Transitioner extends React.Component {
 
     const position = new Animated.Value(this.props.navigation.state.index);
     this._positionListener = position.addListener(({ value }) => {
-      // this works until we detach position from a view!
-      // after that it only updates when we call setValue
-        console.log(value);
+      // This should work until we detach position from a view! so we have to be
+      // careful to not ever detach it, thus the gymnastics in _getPosition in
+      // StackViewLayout
+      // This should log each frame when releasing the gesture or when pressing
+      // the back button! If not, something has gone wrong with the animated
+      // value subscription
+      // console.log(value);
     });
 
     this.state = {
