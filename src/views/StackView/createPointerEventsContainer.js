@@ -53,9 +53,9 @@ export default function createPointerEventsContainer(Component) {
     }
 
     _onPositionChange = ({ value }) => {
-      // This should log each frame when releasing the gesture or when
-      // pressing the back button! If not, something has gone wrong with the
-      // animated value subscription
+      // This should log each frame when releasing the gesture or when pressing
+      // the back button! If not, something has gone wrong with the animated
+      // value subscription
       // console.log(value);
 
       if (this._component) {
