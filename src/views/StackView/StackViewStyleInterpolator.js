@@ -47,11 +47,6 @@ function forHorizontal(props) {
 
   const { first, last } = interpolate;
   const index = scene.index;
-  const opacity = position.interpolate({
-    inputRange: [first, first + 0.01, index, last - 0.01, last],
-    outputRange: [0, 1, 1, 0.85, 0],
-    extrapolate: 'clamp',
-  });
 
   const width = layout.initWidth;
   const translateX = position.interpolate({
@@ -63,9 +58,15 @@ function forHorizontal(props) {
   });
   const translateY = 0;
 
+  const shadowOpacity = position.interpolate({
+    inputRange: [first, index, last],
+    outputRange: [0.01, 0.2, 0.01],
+    extrapolate: 'clamp',
+  });
+
   return {
-    opacity,
     transform: [{ translateX }, { translateY }],
+    shadowOpacity,
   };
 }
 
@@ -84,12 +85,6 @@ function forVertical(props) {
 
   const { first, last } = interpolate;
   const index = scene.index;
-  const opacity = position.interpolate({
-    inputRange: [first, first + 0.01, index, last - 0.01, last],
-    outputRange: [0, 1, 1, 0.85, 0],
-    extrapolate: 'clamp',
-  });
-
   const height = layout.initHeight;
   const translateY = position.interpolate({
     inputRange: [first, index, last],
@@ -99,7 +94,6 @@ function forVertical(props) {
   const translateX = 0;
 
   return {
-    opacity,
     transform: [{ translateX }, { translateY }],
   };
 }
