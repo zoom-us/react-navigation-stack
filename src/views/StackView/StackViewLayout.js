@@ -640,10 +640,15 @@ class StackViewLayout extends React.Component {
 
   _getHeaderBackTitleVisible() {
     const { headerBackTitleVisible } = this.props;
+    const layoutPreset = this._getHeaderLayoutPreset();
+
+    // Even when we align to center on Android, people should need to opt-in to
+    // showing the back title
+    const enabledByDefault = !(layoutPreset === 'left' || Platform.OS === 'android');
 
     return typeof headerBackTitleVisible === 'boolean'
       ? headerBackTitleVisible
-      : true;
+      : enabledByDefault;
   }
 
   _renderInnerScene(scene) {
