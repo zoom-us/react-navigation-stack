@@ -15,8 +15,8 @@ import GestureInteraction from './src/GestureInteraction';
 // I18nManager.forceRTL(false);
 
 // Comment the following two lines to stop using react-native-screens
-// import { useScreens } from 'react-native-screens';
-// useScreens();
+import { useScreens } from 'react-native-screens';
+useScreens();
 
 const data = [
   { component: SimpleStack, title: 'Simple', routeName: 'SimpleStack' },
