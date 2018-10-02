@@ -223,7 +223,7 @@ class StackViewLayout extends React.Component {
     if (Platform.OS === 'ios' && supportsImprovedSpringAnimation()) {
       Animated.spring(position, {
         toValue,
-        stiffness: 5000,
+        stiffness: 8000,
         damping: 600,
         mass: 3,
         useNativeDriver: USE_NATIVE_DRIVER,
@@ -500,12 +500,12 @@ class StackViewLayout extends React.Component {
     this.setState({ gesturePosition: null }, () => {
       // If the speed of the gesture release is significant, use that as the indication
       // of intent
-      if (gestureVelocity < -0.5) {
+      if (gestureVelocity < -50) {
         this.props.onGestureCanceled && this.props.onGestureCanceled();
         this._reset(immediateIndex, resetDuration);
         return;
       }
-      if (gestureVelocity > 0.5) {
+      if (gestureVelocity > 50) {
         this.props.onGestureFinish && this.props.onGestureFinish();
         this._goBack(immediateIndex, goBackDuration);
         return;
@@ -546,12 +546,12 @@ class StackViewLayout extends React.Component {
     this.setState({ gesturePosition: null }, () => {
       // If the speed of the gesture release is significant, use that as the indication
       // of intent
-      if (gestureVelocity < -0.5) {
+      if (gestureVelocity < -50) {
         this.props.onGestureCanceled && this.props.onGestureCanceled();
         this._reset(immediateIndex, resetDuration);
         return;
       }
-      if (gestureVelocity > 0.5) {
+      if (gestureVelocity > 50) {
         this.props.onGestureFinish && this.props.onGestureFinish();
         this._goBack(immediateIndex, goBackDuration);
         return;

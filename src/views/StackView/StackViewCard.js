@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E9E9EF',
     shadowColor: '#000',
     shadowOffset: { width: -4, height: 0 },
-    shadowRadius: 5,
+    shadowRadius: 6,
   },
   transparent: {
     ...StyleSheet.absoluteFillObject,
