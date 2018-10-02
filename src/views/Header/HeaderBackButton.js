@@ -67,7 +67,9 @@ class HeaderBackButton extends React.PureComponent {
 
     let { initialTextWidth } = this.state;
 
-    if (!title) {
+    if (title === null) {
+      return null;
+    } else if (!title) {
       return truncatedTitle;
     } else if (initialTextWidth && width && initialTextWidth > width) {
       return truncatedTitle;
@@ -84,7 +86,9 @@ class HeaderBackButton extends React.PureComponent {
       truncatedTitle,
     } = this.props;
 
-    if (!backTitleVisible) {
+    let backTitleText = this._getTitleText();
+
+    if (!backTitleVisible || backTitleText === null) {
       return null;
     }
 
