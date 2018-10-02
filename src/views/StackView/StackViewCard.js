@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Platform } from 'react-native';
+import { Animated, StyleSheet, Platform } from 'react-native';
 import { Screen } from 'react-native-screens';
 import createPointerEventsContainer from './createPointerEventsContainer';
 
@@ -25,6 +25,7 @@ function getAccessibilityProps(isActive) {
 class Card extends React.Component {
   render() {
     const {
+      animatedStyle,
       children,
       pointerEvents,
       style,
@@ -42,27 +43,35 @@ class Card extends React.Component {
             extrapolate: 'clamp',
           });
 
+    const { shadowOpacity, ...containerAnimatedStyle } = animatedStyle;
+
     return (
       <Screen
         pointerEvents={pointerEvents}
         onComponentRef={this.props.onComponentRef}
-        style={[transparent ? styles.transparent : styles.main, style]}
+        style={[StyleSheet.absoluteFill, containerAnimatedStyle, style]}
         active={active}
-        {...getAccessibilityProps(isActive)}
       >
-        {children}
+        <Animated.View
+          {...getAccessibilityProps(isActive)}
+          style={[
+            transparent ? styles.transparent : styles.card,
+            { shadowOpacity },
+          ]}
+        >
+          {children}
+        </Animated.View>
       </Screen>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  main: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#E9E9EF',
-    shadowColor: '#000',
-    shadowOffset: { width: -4, height: 0 },
-    shadowRadius: 6,
+  card: {
+    flex: 1,
+    backgroundColor: '#fff',
+    shadowOffset: { width: -3, height: 0 },
+    shadowRadius: 5,
   },
   transparent: {
     ...StyleSheet.absoluteFillObject,

@@ -6,6 +6,7 @@ import { createStackNavigator } from 'react-navigation-stack';
 import { ListSection, Divider } from 'react-native-paper';
 
 import SimpleStack from './src/SimpleStack';
+import ImageStack from './src/ImageStack';
 import TransparentStack from './src/TransparentStack';
 import ModalStack from './src/ModalStack';
 import GestureInteraction from './src/GestureInteraction';
@@ -20,6 +21,7 @@ useScreens();
 
 const data = [
   { component: SimpleStack, title: 'Simple', routeName: 'SimpleStack' },
+  { component: ImageStack, title: 'Image', routeName: 'ImageStack' },
   { component: ModalStack, title: 'Modal', routeName: 'ModalStack' },
   {
     component: TransparentStack,
@@ -29,10 +31,14 @@ const data = [
   { component: GestureInteraction, title: 'Gesture Interaction', routeName: 'GestureInteraction' },
 ];
 
+Expo.Asset.loadAsync(require('react-navigation/src/views/assets/back-icon.png'));
+Expo.Asset.loadAsync(require('react-navigation/src/views/assets/back-icon-mask.png'));
+
 class Home extends React.Component {
   static navigationOptions = {
     title: 'Examples',
   };
+
 
   _renderItem = ({ item }) => (
     <ListSection.Item

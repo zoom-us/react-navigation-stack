@@ -1,6 +1,8 @@
 import { I18nManager } from 'react-native';
 import getSceneIndicesForInterpolationInputRange from '../../utils/getSceneIndicesForInterpolationInputRange';
 
+const EPS = 1e-5;
+
 /**
  * Utility that builds the style for the card in the cards stack.
  *
@@ -56,16 +58,15 @@ function forHorizontal(props) {
       : [width, 0, width * -0.3],
     extrapolate: 'clamp',
   });
-  const translateY = 0;
 
   const shadowOpacity = position.interpolate({
-    inputRange: [first, index, last],
-    outputRange: [0.01, 0.2, 0.01],
+    inputRange: [first - EPS, first, index, last, last + EPS],
+    outputRange: [0, 0.02, 0.25, 0.02, 0],
     extrapolate: 'clamp',
   });
 
   return {
-    transform: [{ translateX }, { translateY }],
+    transform: [{ translateX }],
     shadowOpacity,
   };
 }
@@ -91,10 +92,9 @@ function forVertical(props) {
     outputRange: [height, 0, 0],
     extrapolate: 'clamp',
   });
-  const translateX = 0;
 
   return {
-    transform: [{ translateX }, { translateY }],
+    transform: [{ translateY }],
   };
 }
 

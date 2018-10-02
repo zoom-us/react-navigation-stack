@@ -223,7 +223,7 @@ class StackViewLayout extends React.Component {
     if (Platform.OS === 'ios' && supportsImprovedSpringAnimation()) {
       Animated.spring(position, {
         toValue,
-        stiffness: 8000,
+        stiffness: 7000,
         damping: 600,
         mass: 3,
         useNativeDriver: USE_NATIVE_DRIVER,
@@ -735,7 +735,8 @@ class StackViewLayout extends React.Component {
         realPosition={this.props.transitionProps.position}
         key={`card_${scene.key}`}
         transparent={this.props.transparentCard}
-        style={[style, { paddingTop }, this.props.cardStyle]}
+        animatedStyle={style}
+        style={[{ paddingTop }, this.props.cardStyle]}
         scene={scene}
       >
         {this._renderInnerScene(scene)}
