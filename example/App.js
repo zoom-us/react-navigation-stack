@@ -9,6 +9,7 @@ import SimpleStack from './src/SimpleStack';
 import ImageStack from './src/ImageStack';
 import TransparentStack from './src/TransparentStack';
 import ModalStack from './src/ModalStack';
+import LifecycleInteraction from './src/LifecycleInteraction';
 import GestureInteraction from './src/GestureInteraction';
 
 // Uncomment the following line to force RTL. Requires closing and re-opening
@@ -23,6 +24,7 @@ const data = [
   { component: SimpleStack, title: 'Simple', routeName: 'SimpleStack' },
   { component: ImageStack, title: 'Image', routeName: 'ImageStack' },
   { component: ModalStack, title: 'Modal', routeName: 'ModalStack' },
+  { component: LifecycleInteraction, title: 'Lifecycle', routeName: 'LifecycleStack' },
   {
     component: TransparentStack,
     title: 'Transparent',
