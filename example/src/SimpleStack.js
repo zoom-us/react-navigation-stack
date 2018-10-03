@@ -10,7 +10,7 @@ class ListScreen extends React.Component {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: Math.random() > 0.5 ? '#eee' : '#ccc',
+          backgroundColor: '#fff',
         }}
       >
         <Text>List Screen</Text>
@@ -36,7 +36,7 @@ class DetailsScreen extends React.Component {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: Math.random() > 0.5 ? '#eee' : '#ccc',
+          backgroundColor: '#fff',
         }}
       >
         <Text>Details Screen</Text>

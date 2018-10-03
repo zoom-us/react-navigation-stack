@@ -60,9 +60,9 @@ function forHorizontal(props) {
   });
 
   const shadowOpacity = position.interpolate({
-    inputRange: [first - EPS, first, index, last, last + EPS],
-    outputRange: [0, 0.02, 0.25, 0.02, 0],
-    extrapolate: 'clamp',
+    inputRange: [first, index, last],
+    outputRange: [0, 1, 0],
+    extrapolate: 'clamp'
   });
 
   return {

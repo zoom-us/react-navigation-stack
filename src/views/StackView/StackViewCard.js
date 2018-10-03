@@ -52,12 +52,10 @@ class Card extends React.Component {
         style={[StyleSheet.absoluteFill, containerAnimatedStyle, style]}
         active={active}
       >
+        <Animated.View style={[styles.shadow, { shadowOpacity }]} />
         <Animated.View
           {...getAccessibilityProps(isActive)}
-          style={[
-            transparent ? styles.transparent : styles.card,
-            { shadowOpacity },
-          ]}
+          style={transparent ? styles.transparent : styles.card}
         >
           {children}
         </Animated.View>
@@ -70,8 +68,17 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: '#fff',
-    shadowOffset: { width: -3, height: 0 },
+  },
+  shadow: {
+    top: 0,
+    left: 2,
+    bottom: 0,
+    width: 2,
+    position: 'absolute',
+    backgroundColor: '#fff',
+    shadowOffset: { width: -4, height: 0 },
     shadowRadius: 5,
+    shadowColor: '#000',
   },
   transparent: {
     ...StyleSheet.absoluteFillObject,
