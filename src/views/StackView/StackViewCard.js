@@ -43,7 +43,11 @@ class Card extends React.Component {
             extrapolate: 'clamp',
           });
 
-    const { shadowOpacity, ...containerAnimatedStyle } = animatedStyle;
+    const {
+      shadowOpacity,
+      overlayOpacity,
+      ...containerAnimatedStyle
+    } = animatedStyle;
 
     return (
       <Screen
@@ -52,13 +56,24 @@ class Card extends React.Component {
         style={[StyleSheet.absoluteFill, containerAnimatedStyle, style]}
         active={active}
       >
-        <Animated.View style={[styles.shadow, { shadowOpacity }]} />
+        {shadowOpacity ? (
+          <Animated.View
+            style={[styles.shadow, { shadowOpacity }]}
+            pointerEvents="none"
+          />
+        ) : null}
         <Animated.View
           {...getAccessibilityProps(isActive)}
-          style={transparent ? styles.transparent : styles.card}
+          style={[transparent ? styles.transparent : styles.card]}
         >
           {children}
         </Animated.View>
+        {overlayOpacity ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.overlay, { opacity: overlayOpacity }]}
+          />
+        ) : null}
       </Screen>
     );
   }
@@ -69,14 +84,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000',
+  },
   shadow: {
     top: 0,
-    left: 2,
+    left: 0,
     bottom: 0,
-    width: 2,
+    width: 3,
     position: 'absolute',
     backgroundColor: '#fff',
-    shadowOffset: { width: -4, height: 0 },
+    shadowOffset: { width: -1, height: 1 },
     shadowRadius: 5,
     shadowColor: '#000',
   },

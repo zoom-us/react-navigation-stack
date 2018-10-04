@@ -59,14 +59,23 @@ function forHorizontal(props) {
     extrapolate: 'clamp',
   });
 
+  // TODO: add flag to disable shadow
   const shadowOpacity = position.interpolate({
     inputRange: [first, index, last],
-    outputRange: [0, 1, 0],
-    extrapolate: 'clamp'
+    outputRange: [0, 0.7, 0],
+    extrapolate: 'clamp',
+  });
+
+  // TODO: disable overlay by default, add flag to enable
+  let overlayOpacity = position.interpolate({
+    inputRange: [index, last - 0.5, last, last + EPS],
+    outputRange: [0, 0.05, 0.05, 0],
+    extrapolate: 'clamp',
   });
 
   return {
     transform: [{ translateX }],
+    overlayOpacity,
     shadowOpacity,
   };
 }

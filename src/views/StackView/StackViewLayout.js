@@ -71,7 +71,7 @@ const RESPOND_THRESHOLD = 20;
 /**
  * The distance of touch start from the edge of the screen where the gesture will be recognized
  */
-const GESTURE_RESPONSE_DISTANCE_HORIZONTAL = 30;
+const GESTURE_RESPONSE_DISTANCE_HORIZONTAL = 50;
 const GESTURE_RESPONSE_DISTANCE_VERTICAL = 135;
 
 const USE_NATIVE_DRIVER = true;
@@ -731,11 +731,11 @@ class StackViewLayout extends React.Component {
     return (
       <Card
         {...this.props.transitionProps}
+        key={`card_${scene.key}`}
         position={this._getPosition()}
         realPosition={this.props.transitionProps.position}
-        key={`card_${scene.key}`}
-        transparent={this.props.transparentCard}
         animatedStyle={style}
+        transparent={this.props.transparentCard}
         style={[{ paddingTop }, this.props.cardStyle]}
         scene={scene}
       >
