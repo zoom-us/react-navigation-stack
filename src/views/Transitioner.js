@@ -1,5 +1,12 @@
 import React from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { Easing, StyleSheet, View } from 'react-native';
+import {
+  Easing,
+
+  block,
+  call,
+  Value,
+} from 'react-native-reanimated';
 import invariant from '../utils/invariant';
 
 import NavigationScenesReducer from './ScenesReducer';
@@ -18,23 +25,14 @@ class Transitioner extends React.Component {
     // The initial layout isn't measured. Measured layout will be only available
     // when the component is mounted.
     const layout = {
-      height: new Animated.Value(0),
+      height: new Value(0),
       initHeight: 0,
       initWidth: 0,
       isMeasured: false,
-      width: new Animated.Value(0),
+      width: new Value(0),
     };
 
-    const position = new Animated.Value(this.props.navigation.state.index);
-    this._positionListener = position.addListener(({ value }) => {
-      // This should work until we detach position from a view! so we have to be
-      // careful to not ever detach it, thus the gymnastics in _getPosition in
-      // StackViewLayout
-      // This should log each frame when releasing the gesture or when pressing
-      // the back button! If not, something has gone wrong with the animated
-      // value subscription
-      // console.log(value);
-    });
+    const position = new Value(this.props.navigation.state.index);
 
     this.state = {
       layout,
@@ -60,7 +58,6 @@ class Transitioner extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._positionListener && this._positionListener.remove();
   }
 
   // eslint-disable-next-line react/no-deprecated
@@ -165,7 +162,9 @@ class Transitioner extends React.Component {
           await result;
         }
       }
-      Animated.parallel(animations).start(this._onTransitionEnd);
+
+      // 
+      // Animated.parallel(animations).start(this._onTransitionEnd);
     });
   }
 
