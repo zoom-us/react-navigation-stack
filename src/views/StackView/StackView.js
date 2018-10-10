@@ -1,13 +1,9 @@
 import React from 'react';
-import { NativeModules } from 'react-native';
-
 import { StackActions } from 'react-navigation';
+
 import StackViewLayout from './StackViewLayout';
 import Transitioner from '../Transitioner';
 import TransitionConfigs from './StackViewTransitionConfigs';
-
-const NativeAnimatedModule =
-  NativeModules && NativeModules.NativeAnimatedModule;
 
 class StackView extends React.Component {
   static defaultProps = {
@@ -64,7 +60,6 @@ class StackView extends React.Component {
         prevTransitionProps,
         this.props.navigationConfig.mode === 'modal'
       ).transitionSpec,
-      useNativeDriver: !!NativeAnimatedModule,
     };
   };
 

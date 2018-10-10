@@ -78,23 +78,24 @@ export default createStackNavigator(
     navigationOptions: {
       gesturesEnabled: false,
     },
-    transitionConfig: () => ({
-      transitionSpec: {
-        duration: 300,
-        easing: Easing.inOut(Easing.ease),
-        timing: Animated.timing,
-      },
-      screenInterpolator: sceneProps => {
-        const { position, scene } = sceneProps;
-        const { index } = scene;
+    // TODO: make sure people are able to pass in their own config
+    // transitionConfig: () => ({
+    //   transitionSpec: {
+    //     duration: 300,
+    //     easing: Easing.inOut(Easing.ease),
+    //     timing: Animated.timing,
+    //   },
+    //   screenInterpolator: sceneProps => {
+    //     const { position, scene } = sceneProps;
+    //     const { index } = scene;
 
-        const opacity = position.interpolate({
-          inputRange: [index - 1, index],
-          outputRange: [0, 1],
-        });
+    //     const opacity = interpolate(position, {
+    //       inputRange: [index - 1, index],
+    //       outputRange: [0, 1],
+    //     });
 
-        return { opacity };
-      },
-    }),
+    //     return { opacity };
+    //   },
+    // }),
   }
 );

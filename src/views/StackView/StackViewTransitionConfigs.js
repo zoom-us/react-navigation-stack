@@ -1,24 +1,22 @@
-import { Animated, Easing, Platform } from 'react-native';
+import { Platform } from 'react-native';
+import Animated, { Easing } from 'react-native-reanimated';
 import StyleInterpolator from './StackViewStyleInterpolator';
 import { supportsImprovedSpringAnimation } from '../../utils/ReactNativeFeatures';
 
-let IOSTransitionSpec;
-if (supportsImprovedSpringAnimation()) {
-  // These are the exact values from UINavigationController's animation configuration
-  IOSTransitionSpec = {
-    timing: Animated.spring,
-    stiffness: 1000,
-    damping: 500,
-    mass: 3,
-  };
-} else {
-  // This is an approximation of the IOS spring animation using a derived bezier curve
-  IOSTransitionSpec = {
-    duration: 500,
-    easing: Easing.bezier(0.2833, 0.99, 0.31833, 0.99),
-    timing: Animated.timing,
-  };
-}
+// TODO: the spring polyfill for reanimated doesn't fire the completion callback,
+// so we need to always use timing for now
+// let IOSTransitionSpec = {
+//   timing: Animated.spring,
+//   stiffness: 1000,
+//   damping: 500,
+//   mass: 3,
+// };
+
+let IOSTransitionSpec = {
+  duration: 500,
+  easing: Easing.bezier(0.2833, 0.99, 0.31833, 0.99),
+  timing: Animated.timing,
+};
 
 // Standard iOS navigation transition
 const SlideFromRightIOS = {

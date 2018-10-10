@@ -1,5 +1,7 @@
 import { I18nManager } from 'react-native';
 import getSceneIndicesForInterpolationInputRange from '../../utils/getSceneIndicesForInterpolationInputRange';
+import Animated from 'react-native-reanimated';
+const { interpolate } = Animated;
 
 const EPS = 1e-5;
 
@@ -43,15 +45,15 @@ function forHorizontal(props) {
   if (!layout.isMeasured) {
     return forInitial(props);
   }
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
 
   const width = layout.initWidth;
-  const translateX = position.interpolate({
+  const translateX = interpolate(position, {
     inputRange: [first, index, last],
     outputRange: I18nManager.isRTL
       ? [-width, 0, width * 0.3]
@@ -60,14 +62,14 @@ function forHorizontal(props) {
   });
 
   // TODO: add flag to disable shadow
-  const shadowOpacity = position.interpolate({
+  const shadowOpacity = interpolate(position, {
     inputRange: [first, index, last],
     outputRange: [0, 0.7, 0],
     extrapolate: 'clamp',
   });
 
   // TODO: disable overlay by default, add flag to enable
-  let overlayOpacity = position.interpolate({
+  let overlayOpacity = interpolate(position, {
     inputRange: [index, last - 0.5, last, last + EPS],
     outputRange: [0, 0.05, 0.05, 0],
     extrapolate: 'clamp',
@@ -89,14 +91,14 @@ function forVertical(props) {
   if (!layout.isMeasured) {
     return forInitial(props);
   }
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
   const height = layout.initHeight;
-  const translateY = position.interpolate({
+  const translateY = interpolate(position, {
     inputRange: [first, index, last],
     outputRange: [height, 0, 0],
     extrapolate: 'clamp',
@@ -116,21 +118,21 @@ function forFadeFromBottomAndroid(props) {
   if (!layout.isMeasured) {
     return forInitial(props);
   }
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
   const inputRange = [first, index, last - 0.01, last];
 
-  const opacity = position.interpolate({
+  const opacity = interpolate(position, {
     inputRange,
     outputRange: [0, 1, 1, 0],
     extrapolate: 'clamp',
   });
 
-  const translateY = position.interpolate({
+  const translateY = interpolate(position, {
     inputRange,
     outputRange: [50, 0, 0, 0],
     extrapolate: 'clamp',
@@ -152,13 +154,13 @@ function forFade(props) {
   if (!layout.isMeasured) {
     return forInitial(props);
   }
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
-  const opacity = position.interpolate({
+  const opacity = interpolate(position, {
     inputRange: [first, index, last],
     outputRange: [0, 1, 1],
     extrapolate: 'clamp',

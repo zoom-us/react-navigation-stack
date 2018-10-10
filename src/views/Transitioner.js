@@ -1,14 +1,10 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { Easing } from 'react-native-reanimated';
-const {
-  block,
-  call,
-  Value,
-} = Animated;
 import invariant from '../utils/invariant';
 
 import NavigationScenesReducer from './ScenesReducer';
+const { block, call, Value } = Animated;
 
 // Used for all animations unless overriden
 const DefaultTransitionSpec = {
@@ -135,19 +131,6 @@ class Transitioner extends React.Component {
     const { timing } = transitionSpec;
     delete transitionSpec.timing;
 
-    const positionHasChanged = position.__getValue() !== toValue;
-
-    // if swiped back, indexHasChanged == true && positionHasChanged == false
-    const animations =
-      indexHasChanged && positionHasChanged
-        ? [
-            timing(position, {
-              ...transitionSpec,
-              toValue: nextProps.navigation.state.index,
-            }),
-          ]
-        : [];
-
     // update scenes and play the transition
     this._isTransitionRunning = true;
     this.setState(nextState, async () => {
@@ -162,8 +145,13 @@ class Transitioner extends React.Component {
         }
       }
 
-      // 
-      // Animated.parallel(animations).start(this._onTransitionEnd);
+      // const positionHasChanged = position.__getValue() !== toValue;
+      // if swiped back, indexHasChanged == true && positionHasChanged == false
+      if (indexHasChanged) {
+        timing(position, { ...transitionSpec,
+          toValue: nextProps.navigation.state.index,
+        }).start(this._onTransitionEnd);
+      }
     });
   }
 
@@ -206,6 +194,7 @@ class Transitioner extends React.Component {
     if (!this._isMounted) {
       return;
     }
+
     const prevTransitionProps = this._prevTransitionProps;
     this._prevTransitionProps = null;
 
