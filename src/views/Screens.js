@@ -1,7 +1,8 @@
 import { createScreenComponents } from 'react-native-screens';
-import { createAnimatedComponent } from 'react-native-reanimated';
+import Reanimated from 'react-native-reanimated';
 
-const { Screen, ScreenContainer } = createScreenComponents(createAnimatedComponent);
+const { Screen, ScreenContainer } = createScreenComponents(Reanimated.createAnimatedComponent);
+
 export {
   Screen,
   ScreenContainer,

@@ -278,20 +278,8 @@ class StackViewLayout extends React.Component {
       <PanGestureHandler
         {...this._gestureActivationCriteria()}
         ref={this.panGestureRef}
-        onGestureEvent={Animated.event(
-          [
-            {
-              nativeEvent: {
-                translationX: this.gestureX,
-                translationY: this.gestureY,
-              },
-            },
-          ],
-          {
-            useNativeDriver: USE_NATIVE_DRIVER,
-          }
-        )}
-        onHandlerStateChange={this._handlePanGestureStateChange}
+        onGestureEvent={this.onGestureEvent}
+        onHandlerStateChange={this.onGestureEvent}
         enabled={index > 0 && gesturesEnabled}
       >
         <Animated.View style={containerStyle}>
@@ -306,6 +294,7 @@ class StackViewLayout extends React.Component {
     );
   }
 
+  // TODO: turn this into animated value
   _gestureActivationCriteria = () => {
     let { layout } = this.props.transitionProps;
 
@@ -324,9 +313,10 @@ class StackViewLayout extends React.Component {
       return {
         minOffsetX: this._isMotionInverted() ? -5 : 5,
         maxDeltaY: 20,
-        hitSlop: this._isMotionInverted()
-          ? { left: hitSlop }
-          : { right: hitSlop },
+        hitSlop: { left: -5 },
+        // hitSlop: this._isMotionInverted()
+        //   ? { left: hitSlop }
+        //   : { right: hitSlop },
       };
     }
   };
