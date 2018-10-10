@@ -1,7 +1,10 @@
 import React from 'react';
-import { Animated, StyleSheet, Platform } from 'react-native';
-import { Screen } from 'react-native-screens';
+import { StyleSheet, Platform } from 'react-native';
+import { Screen } from '../Screens';
+import Animated from 'react-native-reanimated';
 import createPointerEventsContainer from './createPointerEventsContainer';
+
+const { interpolate } = Animated;
 
 const EPS = 1e-5;
 
@@ -37,7 +40,7 @@ class Card extends React.Component {
     const active =
       transparent || isActive
         ? 1
-        : position.interpolate({
+        : interpolate(position, {
             inputRange: [index, index + 1 - EPS, index + 1],
             outputRange: [1, 1, 0],
             extrapolate: 'clamp',

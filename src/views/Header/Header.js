@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-  Animated,
   Image,
   Platform,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 
 import { SafeAreaView, withOrientation } from 'react-navigation';
+import Animated from 'react-native-reanimated';
 
 import HeaderTitle from './HeaderTitle';
 import HeaderBackButton from './HeaderBackButton';

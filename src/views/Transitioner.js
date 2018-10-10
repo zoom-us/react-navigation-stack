@@ -1,12 +1,11 @@
 import React from 'react';
-import { Easing, StyleSheet, View } from 'react-native';
-import {
-  Easing,
-
+import { StyleSheet, View } from 'react-native';
+import Animated, { Easing } from 'react-native-reanimated';
+const {
   block,
   call,
   Value,
-} from 'react-native-reanimated';
+} = Animated;
 import invariant from '../utils/invariant';
 
 import NavigationScenesReducer from './ScenesReducer';

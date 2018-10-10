@@ -1,5 +1,7 @@
 import { Dimensions, I18nManager } from 'react-native';
 import getSceneIndicesForInterpolationInputRange from '../../utils/getSceneIndicesForInterpolationInputRange';
+import Animated from 'react-native-reanimated';
+const { interpolate } = Animated;
 
 function hasHeader(scene) {
   if (!scene) {
@@ -53,10 +55,10 @@ function forLayout(props) {
   }
   const isBack = isGoingBack(scenes);
 
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
-  if (!interpolate) return {};
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
+  if (!interpolation) return {};
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
 
   // We really shouldn't render the scene at all until we know the width of the
@@ -80,7 +82,7 @@ function forLayout(props) {
   }
 
   const rtlMult = I18nManager.isRTL ? -1 : 1;
-  const translateX = position.interpolate({
+  const translateX = interpolate(position, {
     inputRange: [first, index, last],
     outputRange: [
       rtlMult * (hasHeader(scenes[first]) ? 0 : width),
@@ -96,15 +98,16 @@ function forLayout(props) {
 
 function forLeft(props) {
   const { position, scene, scenes } = props;
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
 
   return {
-    opacity: position.interpolate(
+    opacity: interpolate(
+      position,
       crossFadeInterpolation(scenes, first, index, last)
     ),
   };
@@ -112,15 +115,16 @@ function forLeft(props) {
 
 function forCenter(props) {
   const { position, scene, scenes } = props;
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
 
   return {
-    opacity: position.interpolate(
+    opacity: interpolate(
+      position,
       crossFadeInterpolation(scenes, first, index, last)
     ),
   };
@@ -128,14 +132,15 @@ function forCenter(props) {
 
 function forRight(props) {
   const { position, scene, scenes } = props;
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
-  const { first, last } = interpolate;
+  if (!interpolation) return { opacity: 0 };
+  const { first, last } = interpolation;
   const index = scene.index;
 
   return {
-    opacity: position.interpolate(
+    opacity: interpolate(
+      position,
       crossFadeInterpolation(scenes, first, index, last)
     ),
   };
@@ -147,11 +152,11 @@ function forRight(props) {
 
 function forLeftButton(props) {
   const { position, scene, scenes } = props;
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
 
   // The gist of what we're doing here is animating the left button _normally_ (fast fade)
@@ -178,7 +183,7 @@ function forLeftButton(props) {
   ];
 
   return {
-    opacity: position.interpolate({
+    opacity: interpolate(position, {
       inputRange,
       outputRange,
     }),
@@ -196,11 +201,11 @@ function forLeftButton(props) {
 const LEFT_LABEL_OFFSET = Dimensions.get('window').width / 2 - 70 - 25;
 function forLeftLabel(props) {
   const { position, scene, scenes } = props;
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
 
   const offset = LEFT_LABEL_OFFSET;
@@ -211,7 +216,7 @@ function forLeftLabel(props) {
     // For now we fade out the label before fading in the title, so the
     // differences between the label and title position can be hopefully not so
     // noticable to the user
-    opacity: position.interpolate({
+    opacity: interpolate(position, {
       inputRange: [
         first,
         first + 0.001,
@@ -233,7 +238,7 @@ function forLeftLabel(props) {
     }),
     transform: [
       {
-        translateX: position.interpolate({
+        translateX: interpolate(position, {
           inputRange: [first, first + 0.001, index, last - 0.001, last],
           outputRange: I18nManager.isRTL
             ? [
@@ -270,16 +275,16 @@ function forLeftLabel(props) {
 const TITLE_OFFSET_IOS = Dimensions.get('window').width / 2 - 70 + 25;
 function forCenterFromLeft(props) {
   const { position, scene, scenes } = props;
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
 
-  if (!interpolate) return { opacity: 0 };
+  if (!interpolation) return { opacity: 0 };
 
-  const { first, last } = interpolate;
+  const { first, last } = interpolation;
   const index = scene.index;
   const offset = TITLE_OFFSET_IOS;
 
   return {
-    opacity: position.interpolate({
+    opacity: interpolate(position, {
       inputRange: [
         first,
         first + 0.001,
@@ -301,7 +306,7 @@ function forCenterFromLeft(props) {
     }),
     transform: [
       {
-        translateX: position.interpolate({
+        translateX: interpolate(position, {
           inputRange: [first, first + 0.001, index, last - 0.001, last],
           outputRange: I18nManager.isRTL
             ? [
@@ -333,16 +338,16 @@ function forBackground() {
 const BACKGROUND_OFFSET = Dimensions.get('window').width;
 function forBackgroundWithTranslation(props) {
   const { position, scene } = props;
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
-  if (!interpolate) return { opacity: 0 };
-  const { first, last } = interpolate;
+  const interpolation = getSceneIndicesForInterpolationInputRange(props);
+  if (!interpolation) return { opacity: 0 };
+  const { first, last } = interpolation;
   const index = scene.index;
   const offset = BACKGROUND_OFFSET;
   const outputRange = [offset, 0, -offset];
   return {
     transform: [
       {
-        translateX: position.interpolate({
+        translateX: interpolate(position, {
           inputRange: [first, index, last],
           outputRange: I18nManager.isRTL ? outputRange.reverse() : outputRange,
         }),

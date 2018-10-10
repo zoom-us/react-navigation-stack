@@ -1,13 +1,11 @@
 import React from 'react';
 
 import {
-  Animated,
   StyleSheet,
   PanResponder,
   Platform,
   View,
   I18nManager,
-  Easing,
   Dimensions,
 } from 'react-native';
 import {
@@ -17,8 +15,10 @@ import {
   withOrientation,
   NavigationProvider,
 } from 'react-navigation';
-import { ScreenContainer } from 'react-native-screens';
+import { ScreenContainer } from '../Screens';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import Animated, { Easing } from 'react-native-reanimated';
+const { Value } = Animated;
 
 import Card from './StackViewCard';
 import Header from '../Header/Header';
@@ -733,7 +733,6 @@ class StackViewLayout extends React.Component {
         {...this.props.transitionProps}
         key={`card_${scene.key}`}
         position={this._getPosition()}
-        realPosition={this.props.transitionProps.position}
         animatedStyle={style}
         transparent={this.props.transparentCard}
         style={[{ paddingTop }, this.props.cardStyle]}
