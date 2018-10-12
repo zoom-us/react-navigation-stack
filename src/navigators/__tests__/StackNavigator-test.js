@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { StyleSheet, View } from 'react-native';
 import renderer from 'react-test-renderer';
 
-import StackNavigator from '../createContainedStackNavigator';
-import { withNavigation } from 'react-navigation';
+import StackNavigator from '../createStackNavigator';
+import { withNavigation } from '@react-navigation/core';
 import NavigationTestUtils from 'react-navigation/NavigationTestUtils';
 
 const styles = StyleSheet.create({
