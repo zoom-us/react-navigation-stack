@@ -24,7 +24,14 @@ class ListScreen extends React.Component {
 class DetailsScreen extends React.Component {
   render() {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#eee',
+        }}
+      >
         <Text>Details Screen</Text>
         <Button
           title="Go to Details... again"
@@ -55,5 +62,6 @@ export default createStackNavigator(
   {
     initialRouteName: 'List',
     mode: 'modal',
+    motionDirection: 'inverted',
   }
 );

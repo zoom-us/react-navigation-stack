@@ -86,7 +86,7 @@ function forHorizontal(props) {
  * Standard iOS-style slide in from the bottom (used for modals).
  */
 function forVertical(props) {
-  const { layout, position, scene } = props;
+  const { layout, position, scene, inverted } = props;
 
   if (!layout.isMeasured) {
     return forInitial(props);
@@ -100,7 +100,7 @@ function forVertical(props) {
   const height = layout.initHeight;
   const translateY = position.interpolate({
     inputRange: [first, index, last],
-    outputRange: [height, 0, 0],
+    outputRange: [inverted ? -height : height, 0, 0],
     extrapolate: 'clamp',
   });
 

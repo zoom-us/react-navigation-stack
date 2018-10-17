@@ -16,6 +16,7 @@ const DefaultNavigationConfig = {
   mode: 'card',
   cardShadowEnabled: true,
   cardOverlayEnabled: false,
+  motionDirection: 'default',
 };
 
 class StackView extends React.Component {
@@ -71,6 +72,14 @@ class StackView extends React.Component {
     };
   };
 
+  _getMotionDirection = () => {
+    const { navigationConfig } = this.props;
+    return navigationConfig &&
+      navigationConfig.hasOwnProperty('motionDirection')
+      ? navigationConfig.motionDirection
+      : DefaultNavigationConfig.motionDirection;
+  };
+
   _getShadowEnabled = () => {
     const { navigationConfig } = this.props;
     return navigationConfig &&
@@ -92,6 +101,7 @@ class StackView extends React.Component {
     return (
       <StackViewLayout
         {...navigationConfig}
+        motionDirection={this._getMotionDirection()}
         shadowEnabled={this._getShadowEnabled()}
         cardOverlayEnabled={this._getCardOverlayEnabled()}
         onGestureBegin={this.props.onGestureBegin}

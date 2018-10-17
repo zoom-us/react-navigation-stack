@@ -102,5 +102,6 @@ export default createStackNavigator(
     cardOverlayEnabled: false,
 
     // headerTransitionPreset: 'uikit',
+    motionDirection: 'inverted',
   }
 );

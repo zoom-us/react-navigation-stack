@@ -305,25 +305,26 @@ class StackViewLayout extends React.Component {
 
   _gestureActivationCriteria = () => {
     let { layout } = this.props.transitionProps;
+    let isMotionInverted = this._isMotionInverted();
 
     if (this._isMotionVertical()) {
       let height = layout.height.__getValue();
 
       return {
         maxDeltaX: 15,
-        minOffsetY: 5,
-        hitSlop: { bottom: -height + GESTURE_RESPONSE_DISTANCE_VERTICAL },
+        minOffsetY: isMotionInverted ? -5 : 5,
+        hitSlop: isMotionInverted
+        ? { top: -height + GESTURE_RESPONSE_DISTANCE_VERTICAL * 2 }
+        : { bottom: -height + GESTURE_RESPONSE_DISTANCE_VERTICAL }
       };
     } else {
       let width = layout.width.__getValue();
       let hitSlop = -width + GESTURE_RESPONSE_DISTANCE_HORIZONTAL;
 
       return {
-        minOffsetX: this._isMotionInverted() ? -5 : 5,
+        minOffsetX: isMotionInverted ? -5 : 5,
         maxDeltaY: 20,
-        hitSlop: this._isMotionInverted()
-          ? { left: hitSlop }
-          : { right: hitSlop },
+        hitSlop: isMotionInverted ? { left: hitSlop } : { right: hitSlop },
       };
     }
   };
@@ -342,17 +343,16 @@ class StackViewLayout extends React.Component {
     return this.props.mode === 'modal';
   };
 
-  // This only currently applies to the horizontal gesture!
   _isMotionInverted = () => {
-    const {
-      transitionProps: { scene },
-    } = this.props;
-    const { options } = scene.descriptor;
-    const { gestureDirection } = options;
+    const { motionDirection } = this.props;
 
-    return typeof gestureDirection === 'string'
-      ? gestureDirection === 'inverted'
-      : I18nManager.isRTL;
+    if (this._isModal()) {
+      return motionDirection === 'inverted';
+    } else {
+      return typeof motionDirection === 'string'
+        ? motionDirection === 'inverted'
+        : I18nManager.isRTL;
+    }
   };
 
   _handleHorizontalPan = nativeEvent => {
@@ -387,7 +387,11 @@ class StackViewLayout extends React.Component {
 
     // TODO: remove this __getValue!
     let distance = layout.height.__getValue();
-    let value = index - nativeEvent.translationY / distance;
+
+    let translationY = this._isMotionInverted()
+      ? -1 * nativeEvent.translationY
+      : nativeEvent.translationY;
+    let value = index - translationY / distance;
     return clamp(index - 1, value, index);
   };
 
@@ -447,22 +451,38 @@ class StackViewLayout extends React.Component {
   _handleActivateGestureVertical = () => {
     let { index } = this.props.transitionProps.navigation.state;
 
-    this.setState({
-      gesturePosition: Animated.add(
-        index,
-        Animated.multiply(
-          -1,
+    if (this._isMotionInverted()) {
+      this.setState({
+        gesturePosition: Animated.add(
+          index,
           Animated.divide(
             this.gestureY,
             this.props.transitionProps.layout.height
           )
-        )
-      ).interpolate({
-        inputRange: [index - 1, index],
-        outputRange: [index - 1, index],
-        extrapolate: 'clamp',
-      }),
-    });
+        ).interpolate({
+          inputRange: [index - 1, index],
+          outputRange: [index - 1, index],
+          extrapolate: 'clamp',
+        }),
+      });
+    } else {
+      this.setState({
+        gesturePosition: Animated.add(
+          index,
+          Animated.multiply(
+            -1,
+            Animated.divide(
+              this.gestureY,
+              this.props.transitionProps.layout.height
+            )
+          )
+        ).interpolate({
+          inputRange: [index - 1, index],
+          outputRange: [index - 1, index],
+          extrapolate: 'clamp',
+        }),
+      });
+    }
   };
 
   _handleReleaseHorizontal = nativeEvent => {
@@ -527,8 +547,10 @@ class StackViewLayout extends React.Component {
 
     // Calculate animate duration according to gesture speed and moved distance
     const distance = layout.height.__getValue();
-    const movedDistance = nativeEvent.translationY;
-    const gestureVelocity = nativeEvent.velocityY;
+    const isMotionInverted = this._isMotionInverted();
+    const movementDirection = isMotionInverted ? -1 : 1;
+    const movedDistance = movementDirection * nativeEvent.translationY;
+    const gestureVelocity = movementDirection * nativeEvent.velocityY;
     const defaultVelocity = distance / ANIMATION_DURATION;
     const velocity = Math.max(Math.abs(gestureVelocity), defaultVelocity);
     const resetDuration = movedDistance / velocity;
@@ -675,9 +697,11 @@ class StackViewLayout extends React.Component {
     );
   }
 
-  _getTransitionConfig = () => {
-    const isModal = this.props.mode === 'modal';
+  _isModal = () => {
+    return this.props.mode === 'modal';
+  };
 
+  _getTransitionConfig = () => {
     return TransitionConfigs.getTransitionConfig(
       this.props.transitionConfig,
       {
@@ -685,7 +709,7 @@ class StackViewLayout extends React.Component {
         position: this._getPosition(),
       },
       this.props.lastTransitionProps,
-      isModal
+      this._isModal()
     );
   };
 
@@ -712,6 +736,7 @@ class StackViewLayout extends React.Component {
         shadowEnabled: this.props.shadowEnabled,
         cardOverlayEnabled: this.props.cardOverlayEnabled,
         position: this._getPosition(),
+        inverted: this._isMotionInverted(),
         scene,
       });
 
