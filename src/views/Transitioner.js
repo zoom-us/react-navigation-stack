@@ -74,6 +74,8 @@ class Transitioner extends React.Component {
       return;
     }
 
+    // console.log(this.props.navigation.state);
+    // console.log(nextProps.navigation.state);
     this._startTransition(this.props, nextProps);
   }
 
@@ -106,11 +108,19 @@ class Transitioner extends React.Component {
     const indexHasChanged =
       props.navigation.state.index !== nextProps.navigation.state.index;
     let nextScenes = this._computeScenes(props, nextProps);
+    console.log(
+      `start transition from ${props.navigation.state.index} to ${
+        nextProps.navigation.state.index
+      }`
+    );
 
     if (!nextScenes) {
+      console.log({ nextScenes });
       // prevTransitionProps are the same as transitionProps in this case
       // because nothing changed
       this._prevTransitionProps = this._transitionProps;
+      console.log('wat');
+      this.state.position.setValue(nextProps.navigation.state.index);
       this._onTransitionEnd();
       return;
     }
@@ -136,6 +146,7 @@ class Transitioner extends React.Component {
     // the same thing here. it's not clear to me why we ever start a transition
     // when the index hasn't changed, this requires further investigation.
     if (!isTransitioning || !indexHasChanged) {
+      console.log('not transitioning and does not have index changed');
       this.setState(nextState, async () => {
         if (nextProps.onTransitionStart) {
           const result = nextProps.onTransitionStart(
@@ -150,12 +161,21 @@ class Transitioner extends React.Component {
         // jump immediately to the new value
         indexHasChanged && position.setValue(toValue);
         // end the transition
+        console.log('lol');
         this._onTransitionEnd();
       });
     } else if (isTransitioning) {
+      console.log('is transitioning');
+      console.log({
+        indexHasChanged,
+        toValue,
+        prevTransitionProps: !!this._prevTransitionProps,
+      });
       this._isTransitionRunning = true;
       this.setState(nextState, async () => {
-        if (nextProps.onTransitionStart) {
+        console.log('set state callback complete')
+        console.log({ prevTransitionProps: !!this._prevTransitionProps });
+        if (nextProps.onTransitionStart && this._prevTransitionProps) {
           const result = nextProps.onTransitionStart(
             this._transitionProps,
             this._prevTransitionProps
@@ -186,12 +206,24 @@ class Transitioner extends React.Component {
 
       // if swiped back, indexHasChanged == true && positionHasChanged == false
       const positionHasChanged = position.__getValue() !== toValue;
+      console.log({ position: position.__getValue(), toValue })
       if (indexHasChanged && positionHasChanged) {
+        console.log(`started animation to ${nextProps.navigation.state.index}`);
         timing(position, {
           ...transitionSpec,
           toValue: nextProps.navigation.state.index,
-        }).start(this._onTransitionEnd);
+        }).start(({ finished }) => {
+          console.log(
+            `${finished ? 'finished' : 'interrupted'} animation to ${
+              nextProps.navigation.state.index
+            }`
+          );
+          requestAnimationFrame(() => {
+            this._onTransitionEnd();
+          })
+        });
       } else {
+        console.log('lol');
         this._onTransitionEnd();
       }
     }
@@ -233,6 +265,7 @@ class Transitioner extends React.Component {
   };
 
   _onTransitionEnd = () => {
+    console.log('end transition');
     if (!this._isMounted) {
       return;
     }
@@ -261,6 +294,7 @@ class Transitioner extends React.Component {
       }
 
       if (this._queuedTransition) {
+        console.log('queued');
         let { prevProps } = this._queuedTransition;
         this._queuedTransition = null;
         this._startTransition(prevProps, this.props);
@@ -273,6 +307,7 @@ class Transitioner extends React.Component {
 
 function buildTransitionProps(props, state) {
   const { navigation, options } = props;
+  // console.log(`buildTransitionProps ${navigation.state.index}`)
 
   const { layout, position, scenes } = state;
 
