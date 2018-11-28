@@ -296,12 +296,10 @@ class StackViewLayout extends React.Component {
         enabled={index > 0 && gesturesEnabled}
       >
         <Animated.View style={containerStyle}>
-          <StackGestureContext.Provider value={this.panGestureRef}>
             <ScreenContainer style={styles.scenes}>
               {scenes.map(s => this._renderCard(s))}
             </ScreenContainer>
             {floatingHeader}
-          </StackGestureContext.Provider>
         </Animated.View>
       </PanGestureHandler>
     );
