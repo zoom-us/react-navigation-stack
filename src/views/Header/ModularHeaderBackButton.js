@@ -8,7 +8,7 @@ import defaultBackImage from '../assets/back-icon.png';
 class ModularHeaderBackButton extends React.PureComponent {
   static defaultProps = {
     tintColor: '#037aff',
-    truncatedTitle: 'Back',
+    truncatedTitle: 'Back'
   };
 
   state = {};
@@ -18,12 +18,12 @@ class ModularHeaderBackButton extends React.PureComponent {
       return;
     }
     this.setState({
-      initialTextWidth: e.nativeEvent.layout.x + e.nativeEvent.layout.width,
+      initialTextWidth: e.nativeEvent.layout.x + e.nativeEvent.layout.width
     });
   };
 
   _renderBackImage() {
-    const { backImage, backTitleVisible, tintColor } = this.props;
+    const { backImage, title, tintColor } = this.props;
 
     let BackImage;
     let props;
@@ -34,89 +34,53 @@ class ModularHeaderBackButton extends React.PureComponent {
       BackImage = backImage;
       props = {
         tintColor,
+        title
       };
     } else {
       BackImage = Image;
       props = {
-        style: [
-          styles.icon,
-          !!backTitleVisible && styles.iconWithTitle,
-          !!tintColor && { tintColor },
-        ],
-        source: defaultBackImage,
+        style: [styles.icon, !!title && styles.iconWithTitle, !!tintColor && { tintColor }],
+        source: defaultBackImage
       };
     }
 
     return <BackImage {...props} />;
   }
 
-  _getTitleText = () => {
-    const { width, title, truncatedTitle } = this.props;
-
-    let { initialTextWidth } = this.state;
-
-    if (title === null) {
-      return null;
-    } else if (!title) {
-      return truncatedTitle;
-    } else if (initialTextWidth && width && initialTextWidth > width) {
-      return truncatedTitle;
-    } else {
-      return title.length > 8 ? truncatedTitle : title;
-    }
-  };
-
-  _maybeRenderTitle() {
-    const { backTitleVisible, titleStyle, tintColor } = this.props;
-    let backTitleText = this._getTitleText();
-
-    if (!backTitleVisible || backTitleText === null) {
-      return null;
-    }
-
-    const { LabelContainerComponent } = this.props;
-
-    return (
-      <LabelContainerComponent>
-        <Text
-          accessible={false}
-          onLayout={this._onTextLayout}
-          style={[
-            styles.title,
-            !!tintColor && { color: tintColor },
-            titleStyle,
-          ]}
-          numberOfLines={1}
-        >
-          {this._getTitleText()}
-        </Text>
-      </LabelContainerComponent>
-    );
-  }
-
   render() {
-    const { onPress, title } = this.props;
-    const { ButtonContainerComponent } = this.props;
+    const {
+      onPress,
+      width,
+      title,
+      titleStyle,
+      tintColor,
+      truncatedTitle
+    } = this.props;
 
-    return (
-      <TouchableItem
-        accessibilityComponentType="button"
-        accessibilityLabel={title ? `${title}, back` : 'Go back'}
-        accessibilityTraits="button"
-        testID="header-back"
-        delayPressIn={0}
-        onPress={onPress}
-        style={styles.container}
-        borderless
-      >
+    const renderTruncated = this.state.initialTextWidth && width ? this.state.initialTextWidth > width : false;
+
+    let backButtonTitle = renderTruncated ? truncatedTitle : title;
+
+    // TODO: When we've sorted out measuring in the header, let's revisit this.
+    // This is clearly a bad workaround.
+    if (backButtonTitle && backButtonTitle.length > 8) {
+      backButtonTitle = truncatedTitle;
+    }
+
+    const { ButtonContainerComponent, LabelContainerComponent } = this.props;
+
+    return <TouchableItem accessibilityComponentType="button" accessibilityLabel={backButtonTitle} accessibilityTraits="button" testID="header-back" delayPressIn={0} onPress={onPress} style={styles.container} borderless>
         <View style={styles.container}>
           <ButtonContainerComponent>
             {this._renderBackImage()}
           </ButtonContainerComponent>
-          {this._maybeRenderTitle()}
+          {typeof backButtonTitle === 'string' && <LabelContainerComponent>
+              <Text onLayout={this._onTextLayout} style={[styles.title, !!tintColor && { color: tintColor }, titleStyle]} numberOfLines={1}>
+                {backButtonTitle}
+              </Text>
+            </LabelContainerComponent>}
         </View>
-      </TouchableItem>
-    );
+      </TouchableItem>;
   }
 }
 
@@ -124,13 +88,11 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     flexDirection: 'row',
-    backgroundColor: 'transparent',
-    marginBottom: 1,
-    overflow: 'visible',
+    backgroundColor: 'transparent'
   },
   title: {
     fontSize: 17,
-    paddingRight: 10,
+    paddingRight: 10
   },
   icon: {
     height: 21,
@@ -139,11 +101,11 @@ const styles = StyleSheet.create({
     marginRight: 22,
     marginVertical: 12,
     resizeMode: 'contain',
-    transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
+    transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }]
   },
   iconWithTitle: {
-    marginRight: 3,
-  },
+    marginRight: 3
+  }
 });
 
 export default ModularHeaderBackButton;

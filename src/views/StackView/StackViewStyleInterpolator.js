@@ -1,8 +1,6 @@
 import { I18nManager } from 'react-native';
 import getSceneIndicesForInterpolationInputRange from '../../utils/getSceneIndicesForInterpolationInputRange';
 
-const EPS = 1e-5;
-
 /**
  * Utility that builds the style for the card in the cards stack.
  *
@@ -30,7 +28,7 @@ function forInitial(props) {
   const translate = focused ? 0 : 1000000;
   return {
     opacity,
-    transform: [{ translateX: translate }, { translateY: translate }],
+    transform: [{ translateX: translate }, { translateY: translate }]
   };
 }
 
@@ -49,36 +47,23 @@ function forHorizontal(props) {
 
   const { first, last } = interpolate;
   const index = scene.index;
+  const opacity = position.interpolate({
+    inputRange: [first, first + 0.01, index, last - 0.01, last],
+    outputRange: [0, 1, 1, 0.85, 0],
+    extrapolate: 'clamp'
+  });
 
   const width = layout.initWidth;
   const translateX = position.interpolate({
     inputRange: [first, index, last],
-    outputRange: I18nManager.isRTL
-      ? [-width, 0, width * 0.3]
-      : [width, 0, width * -0.3],
-    extrapolate: 'clamp',
+    outputRange: I18nManager.isRTL ? [-width, 0, width * 0.3] : [width, 0, width * -0.3],
+    extrapolate: 'clamp'
   });
-
-  const shadowOpacity = props.shadowEnabled
-    ? position.interpolate({
-        inputRange: [first, index, last],
-        outputRange: [0, 0.7, 0],
-        extrapolate: 'clamp',
-      })
-    : null;
-
-  let overlayOpacity = props.cardOverlayEnabled
-    ? position.interpolate({
-        inputRange: [index, last - 0.5, last, last + EPS],
-        outputRange: [0, 0.07, 0.07, 0],
-        extrapolate: 'clamp',
-      })
-    : null;
+  const translateY = 0;
 
   return {
-    transform: [{ translateX }],
-    overlayOpacity,
-    shadowOpacity,
+    opacity,
+    transform: [{ translateX }, { translateY }]
   };
 }
 
@@ -97,15 +82,23 @@ function forVertical(props) {
 
   const { first, last } = interpolate;
   const index = scene.index;
+  const opacity = position.interpolate({
+    inputRange: [first, first + 0.01, index, last - 0.01, last],
+    outputRange: [0, 1, 1, 0.85, 0],
+    extrapolate: 'clamp'
+  });
+
   const height = layout.initHeight;
   const translateY = position.interpolate({
     inputRange: [first, index, last],
     outputRange: [height, 0, 0],
-    extrapolate: 'clamp',
+    extrapolate: 'clamp'
   });
+  const translateX = 0;
 
   return {
-    transform: [{ translateY }],
+    opacity,
+    transform: [{ translateX }, { translateY }]
   };
 }
 
@@ -124,58 +117,24 @@ function forFadeFromBottomAndroid(props) {
 
   const { first, last } = interpolate;
   const index = scene.index;
-  const opacity = position.interpolate({
-    inputRange: [first, first + 0.5, first + 0.9, index, last - 1e-5, last],
-    outputRange: [0, 0.25, 0.7, 1, 1, 0],
-    extrapolate: 'clamp',
-  });
-
-  const height = layout.initHeight;
-  const maxTranslation = height * 0.08;
-  const translateY = position.interpolate({
-    inputRange: [first, index, last],
-    outputRange: [maxTranslation, 0, 0],
-    extrapolate: 'clamp',
-  });
-
-  return {
-    opacity,
-    transform: [{ translateY }],
-  };
-}
-
-function forFadeToBottomAndroid(props) {
-  const { layout, position, scene } = props;
-
-  if (!layout.isMeasured) {
-    return forInitial(props);
-  }
-  const interpolate = getSceneIndicesForInterpolationInputRange(props);
-
-  if (!interpolate) return { opacity: 0 };
-
-  const { first, last } = interpolate;
-  const index = scene.index;
-  const inputRange = [first, index, last];
+  const inputRange = [first, index, last - 0.01, last];
 
   const opacity = position.interpolate({
     inputRange,
-    outputRange: [0, 1, 1],
-    extrapolate: 'clamp',
+    outputRange: [0, 1, 1, 0],
+    extrapolate: 'clamp'
   });
-
-  const height = layout.initHeight;
-  const maxTranslation = height * 0.08;
 
   const translateY = position.interpolate({
     inputRange,
-    outputRange: [maxTranslation, 0, 0],
-    extrapolate: 'clamp',
+    outputRange: [50, 0, 0, 0],
+    extrapolate: 'clamp'
   });
+  const translateX = 0;
 
   return {
     opacity,
-    transform: [{ translateY }],
+    transform: [{ translateX }, { translateY }]
   };
 }
 
@@ -197,11 +156,11 @@ function forFade(props) {
   const opacity = position.interpolate({
     inputRange: [first, index, last],
     outputRange: [0, 1, 1],
-    extrapolate: 'clamp',
+    extrapolate: 'clamp'
   });
 
   return {
-    opacity,
+    opacity
   };
 }
 
@@ -209,6 +168,5 @@ export default {
   forHorizontal,
   forVertical,
   forFadeFromBottomAndroid,
-  forFadeToBottomAndroid,
-  forFade,
+  forFade
 };

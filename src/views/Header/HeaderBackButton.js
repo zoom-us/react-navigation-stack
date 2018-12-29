@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  I18nManager,
-  Image,
-  Text,
-  View,
-  Platform,
-  StyleSheet,
-} from 'react-native';
+import { I18nManager, Image, Text, View, Platform, StyleSheet } from 'react-native';
 
 import TouchableItem from '../TouchableItem';
 
@@ -16,9 +9,9 @@ class HeaderBackButton extends React.PureComponent {
   static defaultProps = {
     pressColorAndroid: 'rgba(0, 0, 0, .32)',
     tintColor: Platform.select({
-      ios: '#037aff',
+      ios: '#037aff'
     }),
-    truncatedTitle: 'Back',
+    truncatedTitle: 'Back'
   };
 
   state = {};
@@ -28,13 +21,12 @@ class HeaderBackButton extends React.PureComponent {
       return;
     }
     this.setState({
-      initialTextWidth: e.nativeEvent.layout.x + e.nativeEvent.layout.width,
+      initialTextWidth: e.nativeEvent.layout.x + e.nativeEvent.layout.width
     });
   };
 
   _renderBackImage() {
-    const { backImage, backTitleVisible, tintColor } = this.props;
-    let title = this._getTitleText();
+    const { backImage, title, tintColor } = this.props;
 
     let BackImage;
     let props;
@@ -45,81 +37,57 @@ class HeaderBackButton extends React.PureComponent {
       BackImage = backImage;
       props = {
         tintColor,
-        title,
+        title
       };
     } else {
       BackImage = Image;
       props = {
-        style: [
-          styles.icon,
-          !!backTitleVisible && styles.iconWithTitle,
-          !!tintColor && { tintColor },
-        ],
-        source: defaultBackImage,
+        style: [styles.icon, !!title && styles.iconWithTitle, !!tintColor && { tintColor }],
+        source: defaultBackImage
       };
     }
 
-    return <BackImage {...props} fadeDuration={0} />;
+    return <BackImage {...props} />;
   }
 
-  _getTitleText = () => {
-    const { width, title, truncatedTitle } = this.props;
-
-    let { initialTextWidth } = this.state;
-
-    if (title === null) {
-      return null;
-    } else if (!title) {
-      return truncatedTitle;
-    } else if (initialTextWidth && width && initialTextWidth > width) {
-      return truncatedTitle;
-    } else {
-      return title;
-    }
-  };
-
   _maybeRenderTitle() {
-    const { backTitleVisible, titleStyle, tintColor } = this.props;
-    let backTitleText = this._getTitleText();
+    const {
+      layoutPreset,
+      backTitleVisible,
+      width,
+      title,
+      titleStyle,
+      tintColor,
+      truncatedTitle
+    } = this.props;
 
-    if (!backTitleVisible || backTitleText === null) {
+    const renderTruncated = this.state.initialTextWidth && width ? this.state.initialTextWidth > width : false;
+
+    const backButtonTitle = renderTruncated ? truncatedTitle : title;
+
+    // If the left preset is used and we aren't on Android, then we
+    // default to disabling the label
+    const titleDefaultsToDisabled = layoutPreset === 'left' || Platform.OS === 'android' || typeof backButtonTitle !== 'string';
+
+    // If the title is explicitly enabled then we respect that
+    if (titleDefaultsToDisabled && !backTitleVisible) {
       return null;
     }
 
-    return (
-      <Text
-        accessible={false}
-        onLayout={this._onTextLayout}
-        style={[styles.title, !!tintColor && { color: tintColor }, titleStyle]}
-        numberOfLines={1}
-      >
-        {this._getTitleText()}
-      </Text>
-    );
+    return <Text accessible={false} onLayout={this._onTextLayout} style={[styles.title, !!tintColor && { color: tintColor }, titleStyle]} numberOfLines={1}>
+        {backButtonTitle}
+      </Text>;
   }
 
   render() {
     const { onPress, pressColorAndroid, title } = this.props;
 
-    let button = (
-      <TouchableItem
-        accessible
-        accessibilityComponentType="button"
-        accessibilityLabel={title ? `${title}, back` : 'Go back'}
-        accessibilityTraits="button"
-        testID="header-back"
-        delayPressIn={0}
-        onPress={onPress}
-        pressColor={pressColorAndroid}
-        style={styles.container}
-        borderless
-      >
+    let button = <TouchableItem accessible accessibilityComponentType="button" accessibilityLabel={title} accessibilityTraits="button" testID="header-back" delayPressIn={0} onPress={onPress} pressColor={pressColorAndroid} style={styles.container} borderless>
         <View style={styles.container}>
           {this._renderBackImage()}
           {this._maybeRenderTitle()}
         </View>
-      </TouchableItem>
-    );
+      </TouchableItem>;
 
     if (Platform.OS === 'android') {
       return <View style={styles.androidButtonWrapper}>{button}</View>;
@@ -132,43 +100,35 @@ class HeaderBackButton extends React.PureComponent {
 const styles = StyleSheet.create({
   androidButtonWrapper: {
     margin: 13,
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   },
   container: {
     alignItems: 'center',
     flexDirection: 'row',
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   },
   title: {
     fontSize: 17,
-    paddingRight: 10,
+    paddingRight: 10
   },
-  icon:
-    Platform.OS === 'ios'
-      ? {
-          backgroundColor: 'transparent',
-          height: 21,
-          width: 13,
-          marginLeft: 9,
-          marginRight: 22,
-          marginVertical: 12,
-          resizeMode: 'contain',
-          transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
-        }
-      : {
-          height: 24,
-          width: 24,
-          margin: 3,
-          resizeMode: 'contain',
-          backgroundColor: 'transparent',
-          transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
-        },
-  iconWithTitle:
-    Platform.OS === 'ios'
-      ? {
-          marginRight: 6,
-        }
-      : {},
+  icon: Platform.OS === 'ios' ? {
+    height: 21,
+    width: 13,
+    marginLeft: 9,
+    marginRight: 22,
+    marginVertical: 12,
+    resizeMode: 'contain',
+    transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }]
+  } : {
+    height: 24,
+    width: 24,
+    margin: 3,
+    resizeMode: 'contain',
+    transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }]
+  },
+  iconWithTitle: Platform.OS === 'ios' ? {
+    marginRight: 6
+  } : {}
 });
 
 export default HeaderBackButton;
