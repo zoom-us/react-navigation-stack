@@ -6,8 +6,7 @@ import {
   Platform,
   StyleSheet,
   View,
-  I18nManager,
-  MaskedViewIOS,
+  I18nManager
 } from 'react-native';
 
 import { SafeAreaView, withOrientation } from 'react-navigation';
@@ -17,6 +16,7 @@ import HeaderBackButton from './HeaderBackButton';
 import ModularHeaderBackButton from './ModularHeaderBackButton';
 import HeaderStyleInterpolator from './HeaderStyleInterpolator';
 
+const MaskedViewIOS = Platform.select({ios: () => require('react-native').MaskedViewIOS,android: ()=>{null},windows:()=>{null},web:()=>{null}})();
 const APPBAR_HEIGHT = Platform.OS === 'ios' ? 44 : 56;
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 20 : 0;
 
